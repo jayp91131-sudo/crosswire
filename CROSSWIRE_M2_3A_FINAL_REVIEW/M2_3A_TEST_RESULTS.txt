@@ -1,0 +1,157 @@
+================================================================================
+CROSSWIRE 2.3A — COMPREHENSIVE TEST EXECUTION RESULTS
+================================================================================
+Timestamp: 2026-11-13T13:10:00+05:30
+Python Engine: CPython 3.11.15 (win32)
+SQLite Engine: 3.53.1
+Pragmas: PRAGMA foreign_keys = ON; PRAGMA recursive_triggers = ON;
+
+--------------------------------------------------------------------------------
+1. CLEAN MIGRATION & TRANSACTIONAL ROLLBACK TEST
+--------------------------------------------------------------------------------
+=== DATABASE PRAGMAS ===
+SQLite Version: 3.53.1
+Journal Mode: wal
+PRAGMA foreign_keys: 1
+PRAGMA recursive_triggers: 1
+
+=== SCHEMA INTROSPECTION ===
+Tables (21): ['agencies', 'agency_payment_account_authorizations', 'agency_provider_account_authorizations', 'booking_operation_claims', 'booking_records', 'child_authoritative_resolution_history', 'child_current_authoritative_resolution', 'child_intent_pricing_snapshots', 'child_operation_outbox', 'child_segment_specs', 'child_supplier_intents', 'ledger_events', 'parent_payment_outbox', 'parent_stay_coverage_specs', 'payment_intents', 'payment_provider_accounts', 'supplier_observation_validations', 'supplier_provider_accounts', 'supplier_reservation_observations', 'voucher_records', 'wallet_holds']
+Indexes (12): ['uidx_booking_records_id_agency', 'uidx_child_intents_composite', 'uidx_child_pricing_bijection', 'uidx_current_active_res_unique', 'uidx_ledger_events_booking_type', 'uidx_obs_res_identity', 'uidx_obs_val_identity', 'uidx_outbox_op_attempt_type', 'uidx_payment_intents_composite', 'uidx_payment_outbox_gateway_idemp', 'uidx_res_hist_composite', 'uidx_val_composite']
+Triggers (12): ['trg_check_outbox_dispatch_authorization', 'trg_check_outbox_status_dispatch_authorization', 'trg_check_payment_account_authorization', 'trg_check_payment_outbox_status_dispatch_authorization', 'trg_check_supplier_account_authorization', 'trg_prevent_delete_observations', 'trg_prevent_delete_res_history', 'trg_prevent_delete_validations', 'trg_prevent_stale_fencing_token_resolution', 'trg_prevent_update_observations', 'trg_prevent_update_res_history', 'trg_prevent_update_validations']
+PRAGMA foreign_key_check violations: 0
+
+=== TRANSACTIONAL ROLLBACK VERIFICATION ===
+Expected failure caught: IntegrityError: AuthorizationError: Unauthorized or disabled supplier provider account for agency
+Rollback Confirmed: 'TEST_AGENCY' was not persisted after aborted transaction.
+
+Clean reproducibility successfully completed.
+
+--------------------------------------------------------------------------------
+2. DATABASE ADVERSARIAL TEST SUITE (34 TESTS)
+--------------------------------------------------------------------------------
+Executing 34 adversarial database tests...
+  [PASS] test_01_invalid_child_parent_relationship_rejected
+  [PASS] test_02_unauthorized_supplier_account_rejected
+  [PASS] test_03_disabled_supplier_authorization_rejected_at_dispatch
+  [PASS] test_04_unauthorized_payment_account_rejected
+  [PASS] test_05_disabled_payment_authorization_rejected_at_dispatch
+  [PASS] test_06_update_to_immutable_observation_blocked
+  [PASS] test_07_delete_from_immutable_observation_blocked
+  [PASS] test_08_insert_or_replace_cannot_bypass_immutability
+  [PASS] test_09_rejected_validation_cannot_become_authoritative
+  [PASS] test_10_inconclusive_validation_cannot_become_authoritative
+  [PASS] test_11_validated_observation_can_become_authoritative
+  [PASS] test_12_mismatched_operation_type_rejected
+  [PASS] test_13_mismatched_operation_attempt_relationship_rejected
+  [PASS] test_14_webhook_observation_stored_without_worker_fence
+  [PASS] test_15_manual_reconciliation_observation_stored_without_worker_fence
+  [PASS] test_16_cross_child_resolution_pointer_rejected
+  [PASS] test_17_expired_worker_lease_rejected
+  [PASS] test_18_stale_fencing_token_rejected
+  [PASS] test_19_duplicate_child_pricing_allocation_rejected
+  [PASS] test_20_invalid_pricing_allocation_relationship_rejected
+  [PASS] test_21_duplicate_active_reservation_across_children_rejected
+  [PASS] test_22_multiple_observations_for_same_child_and_reservation_accepted
+  [PASS] test_23_update_to_validations_table_blocked
+  [PASS] test_24_delete_from_validations_table_blocked
+  [PASS] test_25_update_to_resolution_history_blocked
+  [PASS] test_26_delete_from_resolution_history_blocked
+  [PASS] test_27_payment_outbox_cross_agency_intent_rejected
+  [PASS] test_28_null_idempotency_key_enforced_for_neither_and_lookup_only
+  [PASS] test_29_mandatory_idempotency_key_enforced_for_idempotent_with_lookup
+  [PASS] test_30_global_supplier_account_accessible_without_agency_grant
+  [PASS] test_31_account_revocation_before_dispatch_rejected
+  [PASS] test_32_payment_account_revocation_before_dispatch_rejected
+  [PASS] test_33_stale_fencing_token_resolution_pointer_rejected
+  [PASS] test_34_global_account_revocation_blocks_outbox_dispatch
+
+Test Summary: 34 passed, 0 failed out of 34 total tests.
+
+--------------------------------------------------------------------------------
+3. NETWORK SAFETY & SSRF PREVENTION TEST SUITE (12 TESTS)
+--------------------------------------------------------------------------------
+Executing 12 network safety & SSRF prevention tests...
+  [PASS] test_01_exact_supplier_registry_authorized
+  [PASS] test_02_unauthorized_supplier_host_rejected
+  [PASS] test_03_insecure_http_scheme_rejected
+  [PASS] test_04_loopback_ipv4_rejected
+  [PASS] test_05_loopback_ipv6_rejected
+  [PASS] test_06_private_rfc1918_ips_rejected
+  [PASS] test_07_link_local_and_cloud_metadata_rejected
+  [PASS] test_08_ipv4_mapped_ipv6_loopback_rejected
+  [PASS] test_09_ipv4_mapped_ipv6_metadata_rejected
+  [PASS] test_10_dns_rebinding_pinning
+  [PASS] test_11_redirect_validation_blocks_unauthorized_host
+  [PASS] test_12_redirect_strips_credentials_on_host_change
+
+Network Safety Test Summary: 12 passed, 0 failed out of 12 tests.
+
+--------------------------------------------------------------------------------
+4. PYTEST COMBINED EXECUTION (46 PROTOTYPE TESTS)
+--------------------------------------------------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.15, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\jayp9\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\jayp9\.gemini\antigravity\scratch\crosswire
+configfile: pytest.ini
+plugins: anyio-4.16.0, asyncio-1.4.1.post1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 46 items
+
+test_adversarial_suite.py::test_01_invalid_child_parent_relationship_rejected PASSED [  2%]
+test_adversarial_suite.py::test_02_unauthorized_supplier_account_rejected PASSED [  4%]
+test_adversarial_suite.py::test_03_disabled_supplier_authorization_rejected_at_dispatch PASSED [  6%]
+test_adversarial_suite.py::test_04_unauthorized_payment_account_rejected PASSED [  8%]
+test_adversarial_suite.py::test_05_disabled_payment_authorization_rejected_at_dispatch PASSED [ 10%]
+test_adversarial_suite.py::test_06_update_to_immutable_observation_blocked PASSED [ 13%]
+test_adversarial_suite.py::test_07_delete_from_immutable_observation_blocked PASSED [ 15%]
+test_adversarial_suite.py::test_08_insert_or_replace_cannot_bypass_immutability PASSED [ 17%]
+test_adversarial_suite.py::test_09_rejected_validation_cannot_become_authoritative PASSED [ 19%]
+test_adversarial_suite.py::test_10_inconclusive_validation_cannot_become_authoritative PASSED [ 21%]
+test_adversarial_suite.py::test_11_validated_observation_can_become_authoritative PASSED [ 23%]
+test_adversarial_suite.py::test_12_mismatched_operation_type_rejected PASSED [ 26%]
+test_adversarial_suite.py::test_13_mismatched_operation_attempt_relationship_rejected PASSED [ 28%]
+test_adversarial_suite.py::test_14_webhook_observation_stored_without_worker_fence PASSED [ 30%]
+test_adversarial_suite.py::test_15_manual_reconciliation_observation_stored_without_worker_fence PASSED [ 32%]
+test_adversarial_suite.py::test_16_cross_child_resolution_pointer_rejected PASSED [ 34%]
+test_adversarial_suite.py::test_17_expired_worker_lease_rejected PASSED  [ 36%]
+test_adversarial_suite.py::test_18_stale_fencing_token_rejected PASSED   [ 39%]
+test_adversarial_suite.py::test_19_duplicate_child_pricing_allocation_rejected PASSED [ 41%]
+test_adversarial_suite.py::test_20_invalid_pricing_allocation_relationship_rejected PASSED [ 43%]
+test_adversarial_suite.py::test_21_duplicate_active_reservation_across_children_rejected PASSED [ 45%]
+test_adversarial_suite.py::test_22_multiple_observations_for_same_child_and_reservation_accepted PASSED [ 47%]
+test_adversarial_suite.py::test_23_update_to_validations_table_blocked PASSED [ 50%]
+test_adversarial_suite.py::test_24_delete_from_validations_table_blocked PASSED [ 52%]
+test_adversarial_suite.py::test_25_update_to_resolution_history_blocked PASSED [ 54%]
+test_adversarial_suite.py::test_26_delete_from_resolution_history_blocked PASSED [ 56%]
+test_adversarial_suite.py::test_27_payment_outbox_cross_agency_intent_rejected PASSED [ 58%]
+test_adversarial_suite.py::test_28_null_idempotency_key_enforced_for_neither_and_lookup_only PASSED [ 60%]
+test_adversarial_suite.py::test_29_mandatory_idempotency_key_enforced_for_idempotent_with_lookup PASSED [ 63%]
+test_adversarial_suite.py::test_30_global_supplier_account_accessible_without_agency_grant PASSED [ 65%]
+test_adversarial_suite.py::test_31_account_revocation_before_dispatch_rejected PASSED [ 67%]
+test_adversarial_suite.py::test_32_payment_account_revocation_before_dispatch_rejected PASSED [ 69%]
+test_adversarial_suite.py::test_33_stale_fencing_token_resolution_pointer_rejected PASSED [ 71%]
+test_adversarial_suite.py::test_34_global_account_revocation_blocks_outbox_dispatch PASSED [ 73%]
+test_network_safety.py::test_01_exact_supplier_registry_authorized PASSED [ 76%]
+test_network_safety.py::test_02_unauthorized_supplier_host_rejected PASSED [ 78%]
+test_network_safety.py::test_03_insecure_http_scheme_rejected PASSED     [ 80%]
+test_network_safety.py::test_04_loopback_ipv4_rejected PASSED            [ 82%]
+test_network_safety.py::test_05_loopback_ipv6_rejected PASSED            [ 84%]
+test_network_safety.py::test_06_private_rfc1918_ips_rejected PASSED      [ 86%]
+test_network_safety.py::test_07_link_local_and_cloud_metadata_rejected PASSED [ 89%]
+test_network_safety.py::test_08_ipv4_mapped_ipv6_loopback_rejected PASSED [ 91%]
+test_network_safety.py::test_09_ipv4_mapped_ipv6_metadata_rejected PASSED [ 93%]
+test_network_safety.py::test_10_dns_rebinding_pinning PASSED             [ 95%]
+test_network_safety.py::test_11_redirect_validation_blocks_unauthorized_host PASSED [ 97%]
+test_network_safety.py::test_12_redirect_strips_credentials_on_host_change PASSED [100%]
+
+============================= 46 passed in 0.18s ==============================
+
+--------------------------------------------------------------------------------
+5. FROZEN M2.2 BASELINE SUITE VERIFICATION
+--------------------------------------------------------------------------------
+Command: python -m pytest tests -q
+Result: 196 passed, 1 warning in 73.19s
+Zero Regressions: 100% of M2.2 tests passed with prototype isolated.
+================================================================================

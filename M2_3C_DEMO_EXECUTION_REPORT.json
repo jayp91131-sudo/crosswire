@@ -1,0 +1,87 @@
+{
+  "timestamp": "2026-11-14T13:54:54.514930+00:00",
+  "total_findings": 2,
+  "executions": [
+    {
+      "workflow": "VULNERABLE",
+      "intent_id": "INTENT-DEMO-VULN-001",
+      "booking_id": "TBOH-INTENT-DEMO-VULN-001",
+      "status": "SUPPLIER_CONFIRMED",
+      "retry_count": 1,
+      "supplier_reservation_count": 2,
+      "supplier_reservation_ids": [
+        "SUP-RES-INTENT-DEMO-VULN-001-01",
+        "SUP-RES-INTENT-DEMO-VULN-001-02"
+      ],
+      "invariant_5_2_passed": false
+    },
+    {
+      "workflow": "FIXED",
+      "intent_id": "INTENT-DEMO-FIXED-001",
+      "booking_id": "TBOH-INTENT-DEMO-FIXED-001",
+      "status": "SUPPLIER_CONFIRMED",
+      "retry_count": 1,
+      "supplier_reservation_count": 1,
+      "supplier_reservation_ids": [
+        "SUP-RES-INTENT-DEMO-FIXED-001-01"
+      ],
+      "invariant_5_2_passed": true
+    },
+    {
+      "workflow": "VULNERABLE",
+      "intent_id": "INTENT-DEMO-WH-VULN",
+      "booking_id": "TBOH-INTENT-DEMO-WH-VULN",
+      "event_id": "evt_demo_wh_vuln_replay",
+      "deliveries": 3,
+      "total_refunded_inr": 15000.0,
+      "excess_inr": 3000.0,
+      "inv_5_3_passed": false,
+      "inv_5_4_passed": false,
+      "inv_5_5_passed": false
+    },
+    {
+      "workflow": "FIXED",
+      "intent_id": "INTENT-DEMO-WH-FIXED",
+      "booking_id": "TBOH-INTENT-DEMO-WH-FIXED",
+      "event_id": "evt_demo_wh_fixed_replay",
+      "deliveries": 3,
+      "total_refunded_inr": 5000.0,
+      "excess_inr": 0.0,
+      "inv_5_3_passed": true,
+      "inv_5_4_passed": true,
+      "inv_5_5_passed": true
+    },
+    {
+      "workflow": "OUTBOX_MULTI_SUPPLIER_COORDINATION",
+      "booking_id": "BKG_E2E_DEMO_001",
+      "parent_status": "CONFIRMED",
+      "wallet_hold_status": "CAPTURED",
+      "coverage_satisfied": true,
+      "room_1": {
+        "supplier": "SUP_EXPEDIA",
+        "capability": "IDEMPOTENT_WITH_LOOKUP",
+        "reservation_id": "RES_SUP_EXPEDIA_E497E8BE",
+        "status": "RESERVATION_ACTIVE",
+        "observation_id": "OBS_B10683C0057E"
+      },
+      "room_2": {
+        "supplier": "SUP_HOTELBEDS",
+        "capability": "LOOKUP_ONLY",
+        "reservation_id": "RES_SUP_HOTELBEDS_A93CA87B",
+        "status": "RESERVATION_ACTIVE",
+        "observation_id": "OBS_FABC499B3E4E"
+      }
+    },
+    {
+      "booking_id": "BKG_OUTBOX_VULN_001",
+      "child_intent_id": "CHILD_BKG_OUTBOX_VULN_001_ROOM1",
+      "vulnerability_type": "OUTBOX_BLIND_RETRY_DUPLICATE",
+      "total_reservations_created": 2,
+      "supplier_reservation_ids": [
+        "RES_SUP_EXPEDIA_30FC0DFC",
+        "RES_SUP_EXPEDIA_38BC9F26"
+      ],
+      "duplicate_detected": true
+    }
+  ]
+}

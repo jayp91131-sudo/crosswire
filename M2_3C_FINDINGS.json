@@ -1,0 +1,89 @@
+[
+  {
+    "finding_id": "CW-SEC-M2-001",
+    "scenario_id": "SCN-TIMEOUT-001",
+    "title": "Duplicate Supplier Reservation Generated Under Ambiguous Timeout",
+    "severity": "HIGH",
+    "cwe": "CWE-675: Multiple Operations on Resource / CWE-841: Improper Enforcement of Behavioral Workflow",
+    "violated_invariant": "INV-5.2: Booking Intent Uniqueness",
+    "logical_intent_id": "INTENT-DEMO-VULN-001",
+    "supplier_reservation_ids": [
+      "SUP-RES-INTENT-DEMO-VULN-001-01",
+      "SUP-RES-INTENT-DEMO-VULN-001-02"
+    ],
+    "expected_outcome": "COUNT(supplier_reservations) <= 1 for logical intent",
+    "actual_outcome": "2 distinct supplier reservations committed: ['SUP-RES-INTENT-DEMO-VULN-001-01', 'SUP-RES-INTENT-DEMO-VULN-001-02']",
+    "technical_description": "The agency initiated a booking for intent INTENT-DEMO-VULN-001. The supplier persisted the initial reservation (SUP-RES-INTENT-DEMO-VULN-001-01) but the response was delayed beyond the 0.15s aggregator HTTP timeout. The vulnerable aggregator naively re-issued POST /reservations without passing a deterministic idempotency key or querying existing status. The supplier persisted a second reservation (SUP-RES-INTENT-DEMO-VULN-001-02), committing duplicate financial liabilities.",
+    "remediation_guidance": "1. Enforce capability-aware dispatching: pass a deterministic idempotency key on all mutating requests.\n2. On ambiguous timeout, invoke supplier reference lookup or safe idempotent replay.\n3. If the supplier lacks idempotency (NEITHER capability), escalate to RECONCILIATION_REQUIRED rather than blindly retrying.",
+    "evidence": {
+      "intent_id": "INTENT-DEMO-VULN-001",
+      "booking_id": "TBOH-INTENT-DEMO-VULN-001",
+      "aggregator_status": "SUPPLIER_CONFIRMED",
+      "retry_count": 1,
+      "supplier_reservation_count": 2,
+      "supplier_reservation_ids": [
+        "SUP-RES-INTENT-DEMO-VULN-001-01",
+        "SUP-RES-INTENT-DEMO-VULN-001-02"
+      ],
+      "invariant_passed": false,
+      "diff_summary": "============================================================\nCROSSWIRE INVARIANT VERIFICATION REPORT\n============================================================\nBooking Intent ID : INTENT-DEMO-VULN-001\nAggregator Booking: TBOH-INTENT-DEMO-VULN-001\nFinal Aggregator Status: SUPPLIER_CONFIRMED\n------------------------------------------------------------\nEXPECTED: COUNT(confirmed supplier reservations) <= 1\nACTUAL  : COUNT(confirmed supplier reservations) == 2\nSTATUS  : [VIOLATION DETECTED]\n------------------------------------------------------------\nSUPPLIER RESERVATIONS RECORDED IN SQLITE:\n  [1] SUP-RES-INTENT-DEMO-VULN-001-02\n  [2] SUP-RES-INTENT-DEMO-VULN-001-01\n------------------------------------------------------------\nFINANCIAL & OPERATIONAL RISK:\n  - Multiple distinct reservations committed on supplier for a single customer intent.\n  - Aggregator is financially liable for duplicate non-refundable rooms.\n  - CWE-675 (Duplicate Operations on Resource) / CWE-841 (Workflow Violation).\n============================================================"
+    },
+    "retest_result": {
+      "retest_id": "RETEST-TIMEOUT-20261114135453",
+      "timestamp": "2026-11-14T13:54:53.958169+00:00",
+      "fixed_mode_passed": true,
+      "supplier_reservation_count": 1,
+      "supplier_reservation_ids": [
+        "SUP-RES-INTENT-DEMO-FIXED-001-01"
+      ],
+      "invariant_passed": true,
+      "summary": "Fixed mode reconciled ambiguous timeout via idempotency contract. Exactly 1 reservation (SUP-RES-INTENT-DEMO-FIXED-001-01) committed in supplier DB. Invariant 5.2 passed."
+    },
+    "created_at": "2026-11-14T13:54:53.706493+00:00"
+  },
+  {
+    "finding_id": "CW-SEC-M2-002",
+    "scenario_id": "SCN-WEBHOOK-001",
+    "title": "Duplicate Financial Ledger Entries and Entitlement Overflow via Webhook Replay",
+    "severity": "CRITICAL",
+    "cwe": "CWE-675: Multiple Operations on Resource / CWE-799: Improper Control of Interaction Frequency",
+    "violated_invariant": "INV-5.3: Webhook Idempotency & INV-5.5: Refund Boundedness",
+    "logical_intent_id": "INTENT-DEMO-WH-VULN",
+    "supplier_reservation_ids": [],
+    "expected_outcome": "Single refund effect (5,000 INR) with total refund <= 12000.0 INR",
+    "actual_outcome": "3 duplicate ledger entries created totaling 15000.0 INR. Excess over entitlement: 3000.0 INR.",
+    "technical_description": "The payment provider delivered webhook event 'evt_demo_wh_vuln_replay' 3 times. In vulnerable mode, the aggregator processed each delivery as a distinct refund, creating 3 separate ledger credit entries and disbursing 15000.0 INR, which exceeded the maximum allowable refund entitlement (12000.0 INR) by 3000.0 INR.",
+    "remediation_guidance": "1. Enforce atomic idempotency locks on incoming webhook event IDs.\n2. Record processed event IDs in an immutable deduplication store before applying financial ledger mutations.\n3. Reject duplicate deliveries with HTTP 200 (idempotent no-op) without re-executing accounting transfers.",
+    "evidence": {
+      "intent_id": "INTENT-DEMO-WH-VULN",
+      "booking_id": "TBOH-INTENT-DEMO-WH-VULN",
+      "event_id": "evt_demo_wh_vuln_replay",
+      "deliveries_attempted": 3,
+      "deliveries_status_codes": [
+        200,
+        200,
+        200
+      ],
+      "duplicate_ledger_entries": [
+        11992,
+        11993,
+        11994
+      ],
+      "total_refunded_minor": 1500000,
+      "entitlement_minor": 1200000,
+      "excess_minor": 300000,
+      "idempotency_check_passed": false,
+      "boundedness_check_passed": false
+    },
+    "retest_result": {
+      "retest_id": "RETEST-WEBHOOK-20261114135454",
+      "timestamp": "2026-11-14T13:54:54.507917+00:00",
+      "fixed_mode_passed": true,
+      "supplier_reservation_count": 0,
+      "supplier_reservation_ids": [],
+      "invariant_passed": true,
+      "summary": "Fixed mode deduplicated repeated webhook deliveries. Exactly 1 refund (5,000 INR) applied across 3 deliveries. Invariants 5.3 & 5.4 passed."
+    },
+    "created_at": "2026-11-14T13:54:54.224244+00:00"
+  }
+]

@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crosswire | Forensic Operations Console M2.7</title>
+    <!-- Crosswire Engine Compatibility: CONTROL CENTER M2.4 -->
+    <style>
+        /* ==========================================================================
+           CROSSWIRE M2.7.1 — FORENSIC OPERATIONS CONSOLE
+           Visual Identity: Swiss Editorial Precision + Industrial Terminal UX
+           Layout: Tables, split panes, and continuous timelines. Zero card grids.
+           ========================================================================== */
+        :root {
+            --bg-main: #F0EFE9;
+            --surface-primary: #FFFFFF;
+            --surface-secondary: #F6F5F0;
+            --surface-sunken: #EBEAE3;
+            --text-primary: #202721;
+            --text-secondary: #70766E;
+            --text-muted: #9BA099;
+            --border-color: #D9DAD2;
+            --border-light: #E5E6DE;
+            --brand-accent: #C64C32;
+            --critical: #B9362B;
+            --warning: #C28B35;
+            --success: #35694F;
+            --tech-accent: #49677A;
+            --forensic-panel: #202721;
+            --forensic-text: #E6E8E3;
+            --forensic-muted: #8E948C;
+
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: "IBM Plex Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+
+            --sidebar-width: 220px;
+            --topbar-height: 44px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.4;
+            font-size: 13px;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+            font-feature-settings: "tnum" 1, "zero" 1;
+        }
+
+        /* Status & Badges (Clean, Sharp Borders, Non-Card) */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 6px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .status-crit {
+            color: var(--critical);
+            background: rgba(185, 54, 43, 0.08);
+            border-color: rgba(185, 54, 43, 0.3);
+        }
+        .status-warn {
+            color: var(--warning);
+            background: rgba(194, 139, 53, 0.08);
+            border-color: rgba(194, 139, 53, 0.3);
+        }
+        .status-pass {
+            color: var(--success);
+            background: rgba(53, 105, 79, 0.08);
+            border-color: rgba(53, 105, 79, 0.3);
+        }
+        .status-tech {
+            color: var(--tech-accent);
+            background: rgba(73, 103, 122, 0.08);
+            border-color: rgba(73, 103, 122, 0.3);
+        }
+        .status-neutral {
+            color: var(--text-secondary);
+            background: var(--surface-sunken);
+            border-color: var(--border-color);
+        }
+
+        /* ==========================================================================
+           APPLICATION SHELL
+           ========================================================================== */
+        .app-shell {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* LEFT NAVIGATION RAIL */
+        .nav-rail {
+            width: var(--sidebar-width);
+            background: var(--surface-primary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 20;
+        }
+
+        .brand-header {
+            height: var(--topbar-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--surface-secondary);
+        }
+        .brand-title {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-title::before {
+            content: "";
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: var(--brand-accent);
+        }
+        .brand-version {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        .nav-sections {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+        .nav-group-title {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            padding: 10px 16px 4px 16px;
+            text-transform: uppercase;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: color 0.1s ease, background 0.1s ease;
+        }
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: var(--surface-secondary);
+        }
+        .nav-item.active {
+            color: var(--text-primary);
+            background: var(--surface-secondary);
+            border-left-color: var(--brand-accent);
+            font-weight: 600;
+        }
+        .nav-item svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 1.75;
+            flex-shrink: 0;
+            opacity: 0.75;
+        }
+        .nav-item.active svg {
+            opacity: 1;
+            stroke: var(--brand-accent);
+        }
+
+        .nav-footer {
+            padding: 10px 16px;
+            border-top: 1px solid var(--border-color);
+            background: var(--surface-secondary);
+            font-size: 10.5px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* MAIN CONTENT VIEWPORT */
+        .main-viewport {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg-main);
+        }
+
+        /* COMPACT HORIZONTAL TOP BAR */
+        .top-bar {
+            height: var(--topbar-height);
+            background: var(--surface-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .breadcrumb-sep {
+            color: var(--text-muted);
+        }
+        .breadcrumb-current {
+            color: var(--text-primary);
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .env-badge {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            padding: 2px 7px;
+            background: var(--surface-sunken);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .env-pulse {
+            width: 5px;
+            height: 5px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+        .system-stat {
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* VIEW CONTAINER */
+        .view-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        .console-view {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 16px 22px;
+        }
+        .console-view.active {
+            display: flex;
+        }
+
+        /* ==========================================================================
+           EDITORIAL HEADERS & METRICS STRIP (COMPACT, NO CARDS)
+           ========================================================================== */
+        .editorial-header {
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .editorial-kicker {
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--brand-accent);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .editorial-title {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+        .editorial-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            max-width: 820px;
+        }
+
+        /* HORIZONTAL METRICS STRIP (SLEEK & COMPACT) */
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--surface-primary);
+            border: 1px solid var(--border-color);
+            margin-bottom: 14px;
+        }
+        .metric-cell {
+            padding: 10px 16px;
+            border-right: 1px solid var(--border-color);
+        }
+        .metric-cell:last-child {
+            border-right: none;
+        }
+        .metric-label {
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .metric-val {
+            font-family: var(--font-mono);
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--text-primary);
+        }
+        .metric-sub {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ==========================================================================
+           ENTERPRISE DATA TABLES
+           ========================================================================== */
+        .table-wrapper {
+            background: var(--surface-primary);
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+        .table-header-bar {
+            padding: 8px 14px;
+            background: var(--surface-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .table-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+        .table-meta {
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            color: var(--text-secondary);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+        .data-table th {
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            background: var(--surface-secondary);
+            padding: 7px 12px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .data-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table tbody tr {
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+        .data-table tbody tr:hover {
+            background: #EAEBE3;
+        }
+        .data-table tbody tr.active-row {
+            background: #E7E8DF;
+            outline: 1px solid var(--brand-accent);
+        }
+
+        /* ==========================================================================
+           SCENARIO CATALOGUE
+           ========================================================================== */
+        .catalogue-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface-primary);
+            border: 1px solid var(--border-color);
+        }
+        .catalogue-row {
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.1s ease;
+        }
+        .catalogue-row:last-child {
+            border-bottom: none;
+        }
+        .catalogue-row:hover {
+            background: var(--surface-secondary);
+        }
+        .catalogue-cell-id {
+            width: 170px;
+            padding: 14px 16px;
+            border-right: 1px solid var(--border-light);
+            vertical-align: top;
+        }
+        .catalogue-cell-body {
+            padding: 14px 20px;
+            vertical-align: top;
+        }
+        .catalogue-cell-actions {
+            width: 220px;
+            padding: 14px 16px;
+            border-left: 1px solid var(--border-light);
+            vertical-align: top;
+            text-align: right;
+        }
+        .scen-code {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 12.5px;
+            color: var(--brand-accent);
+            display: block;
+        }
+        .scen-avail {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            display: inline-block;
+        }
+        .scen-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+        .scen-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .scen-invariants {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        /* ==========================================================================
+           EXECUTION WORKSPACE: 3-PANE SPLIT
+           ========================================================================== */
+        .workbench-layout {
+            display: flex;
+            height: calc(100vh - var(--topbar-height) - 40px);
+            background: var(--surface-primary);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        /* PANE 1: CONTROLS (22%) */
+        .pane-control {
+            width: 22%;
+            border-right: 1px solid var(--border-color);
+            background: var(--surface-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .pane-header {
+            padding: 10px 14px;
+            background: var(--surface-sunken);
+            border-bottom: 1px solid var(--border-color);
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+        .pane-body {
+            padding: 14px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .control-block {
+            margin-bottom: 14px;
+        }
+        .control-label {
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .form-select, .form-input {
+            width: 100%;
+            padding: 7px 9px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-primary);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-primary);
+            outline: none;
+        }
+        .form-select:focus, .form-input:focus {
+            border-color: var(--brand-accent);
+        }
+
+        .segmented-mode {
+            display: flex;
+            border: 1px solid var(--border-color);
+            background: var(--surface-sunken);
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 7px 5px;
+            border: none;
+            background: transparent;
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.04em;
+            transition: all 0.1s ease;
+        }
+        .mode-btn.active-vuln {
+            background: var(--critical);
+            color: #FFFFFF;
+        }
+        .mode-btn.active-fixed {
+            background: var(--success);
+            color: #FFFFFF;
+        }
+
+        .btn-execute {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--brand-accent);
+            color: #FFFFFF;
+            border: 1px solid #A83C25;
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background 0.1s ease;
+        }
+        .btn-execute:hover {
+            background: #B33F27;
+        }
+        .btn-execute:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .exec-status-box {
+            margin-top: 14px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-primary);
+        }
+        .exec-status-header {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        /* PANE 2: CHRONOLOGICAL TIMELINE (48%) */
+        .pane-timeline {
+            width: 48%;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--surface-primary);
+        }
+        .timeline-stream {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .stream-track {
+            position: relative;
+            padding-left: 24px;
+        }
+        .stream-track::before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            left: 7px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .stream-item {
+            position: relative;
+            margin-bottom: 18px;
+            cursor: pointer;
+            padding: 4px 6px;
+            transition: background 0.1s ease;
+        }
+        .stream-item:hover {
+            background: var(--surface-secondary);
+        }
+        .stream-item.active-event {
+            background: #EAECE2;
+            outline-left: 2px solid var(--brand-accent);
+        }
+        .stream-node {
+            position: absolute;
+            left: -21px;
+            top: 4px;
+            width: 9px;
+            height: 9px;
+            border: 2px solid var(--surface-primary);
+            background: var(--text-secondary);
+            border-radius: 50%;
+            z-index: 2;
+        }
+        .stream-node.node-crit { background: var(--critical); }
+        .stream-node.node-warn { background: var(--warning); }
+        .stream-node.node-pass { background: var(--success); }
+        .stream-node.node-tech { background: var(--tech-accent); }
+
+        .stream-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+        .stream-time {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        .stream-actor {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 4px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-sunken);
+            letter-spacing: 0.06em;
+        }
+        .stream-actor.actor-aggregator { color: var(--tech-accent); }
+        .stream-actor.actor-supplier { color: var(--brand-accent); }
+        .stream-actor.actor-payment { color: var(--warning); }
+        .stream-actor.actor-oracle { color: var(--critical); }
+
+        .stream-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+        .stream-detail {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* PANE 3: DOCKED INSPECTION (30%) */
+        .pane-inspector {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--surface-secondary);
+        }
+        .inspector-content {
+            padding: 14px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .inspector-row {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .inspector-row:last-child {
+            border-bottom: none;
+        }
+        .inspector-prop {
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 3px;
+        }
+        .inspector-val {
+            font-size: 12px;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .workbench-footer {
+            height: 36px;
+            background: var(--surface-primary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            flex-shrink: 0;
+        }
+
+        /* ==========================================================================
+           FINDINGS REGISTRY (TABLE + DOCKED DETAIL INSPECTOR)
+           ========================================================================== */
+        .findings-workbench {
+            display: flex;
+            height: calc(100vh - var(--topbar-height) - 40px);
+            background: var(--surface-primary);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .findings-list-pane {
+            flex: 1;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+        }
+        .findings-inspect-pane {
+            width: 440px;
+            background: var(--surface-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .state-diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            background: var(--surface-primary);
+        }
+        .state-diff-table th {
+            background: var(--surface-sunken);
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            text-align: left;
+        }
+        .state-diff-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: top;
+        }
+        .diff-expected { color: var(--success); }
+        .diff-observed { color: var(--critical); font-weight: 700; }
+
+        /* ==========================================================================
+           EVIDENCE INSPECTOR (3-COLUMN SPLIT)
+           ========================================================================== */
+        .evidence-layout {
+            display: flex;
+            height: calc(100vh - var(--topbar-height) - 40px);
+            background: var(--surface-primary);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .evidence-left {
+            width: 260px;
+            border-right: 1px solid var(--border-color);
+            background: var(--surface-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .evidence-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--forensic-panel);
+            color: var(--forensic-text);
+        }
+        .evidence-right {
+            width: 320px;
+            border-left: 1px solid var(--border-color);
+            background: var(--surface-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .dark-terminal-header {
+            padding: 7px 14px;
+            background: #171C18;
+            border-bottom: 1px solid #2B332C;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            color: var(--forensic-muted);
+        }
+        .raw-json-viewer {
+            flex: 1;
+            padding: 14px;
+            overflow: auto;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--forensic-text);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .btn-terminal-action {
+            padding: 2px 7px;
+            background: #2A332B;
+            border: 1px solid #3B463C;
+            color: var(--forensic-text);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .btn-terminal-action:hover {
+            background: #39453B;
+        }
+
+        /* BUTTONS */
+        .btn-action-sm {
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-primary);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-action-sm:hover {
+            background: var(--surface-sunken);
+            border-color: var(--text-secondary);
+        }
+        .btn-retest {
+            background: var(--brand-accent);
+            color: #FFFFFF;
+            border-color: #A83C25;
+        }
+        .btn-retest:hover {
+            background: #B33F27;
+        }
+
+        .text-crit { color: var(--critical); font-weight: 600; }
+        .text-pass { color: var(--success); font-weight: 600; }
+        .text-warn { color: var(--warning); font-weight: 600; }
+        .text-tech { color: var(--tech-accent); }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+    <!-- ========================================================================
+         LEFT FIXED NAVIGATION RAIL
+         ======================================================================== -->
+    <aside class="nav-rail">
+        <div class="brand-header">
+            <div class="brand-title">
+                CROSSWIRE
+            </div>
+            <span class="brand-version mono">M2.7</span>
+        </div>
+
+        <nav class="nav-sections">
+            <div class="nav-group-title">OPERATIONS</div>
+            <a class="nav-item active" id="nav-overview" onclick="switchView('overview')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Overview
+            </a>
+            <a class="nav-item" id="nav-scenarios" onclick="switchView('scenarios')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Scenario Library
+            </a>
+            <a class="nav-item" id="nav-workspace" onclick="switchView('workspace')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                Executions
+            </a>
+
+            <div class="nav-group-title">SECURITY</div>
+            <a class="nav-item" id="nav-findings" onclick="switchView('findings')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Findings
+            </a>
+            <a class="nav-item" id="nav-evidence" onclick="switchView('evidence')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Evidence
+            </a>
+
+            <div class="nav-group-title">MANAGEMENT</div>
+            <a class="nav-item" id="nav-reports" onclick="switchView('reports')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Reports
+            </a>
+            <a class="nav-item" id="nav-diagnostics" onclick="switchView('diagnostics')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Diagnostics
+            </a>
+        </nav>
+
+        <div class="nav-footer">
+            <div>Scope: Single-Hotel / INR</div>
+            <div style="margin-top:2px;">Engine: M2.7 Forensic Operations Console</div>
+        </div>
+    </aside>
+
+    <!-- ========================================================================
+         MAIN APPLICATION VIEWPORT
+         ======================================================================== -->
+    <div class="main-viewport">
+
+        <!-- COMPACT HORIZONTAL TOP BAR -->
+        <header class="top-bar">
+            <div class="top-left">
+                <div class="breadcrumb">
+                    <span>CROSSWIRE</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current" id="topbar-section-title">OVERVIEW</span>
+                </div>
+            </div>
+
+            <div class="top-right">
+                <div class="system-stat">
+                    <span>TARGET:</span>
+                    <select id="topbar-target-select" onchange="onTopBarTargetChange()" style="font-family: var(--font-mono); font-size: 10px; padding: 1px 6px; background: var(--surface-sunken); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; border-radius: 0;">
+                        <option value="target_a">Target A (Ref)</option>
+                        <option value="travel_sandbox_b">Target B (Sandbox)</option>
+                    </select>
+                </div>
+                <div class="env-badge">
+                    <span class="env-pulse"></span>
+                    LOCAL / SYNTHETIC
+                </div>
+                <div class="system-stat">
+                    <span>ENGINE:</span>
+                    <span class="text-pass">ONLINE</span>
+                </div>
+                <div class="system-stat">
+                    <span>LEDGER:</span>
+                    <span class="mono">SQLite OK</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEWS VIEWPORT -->
+        <div class="view-container">
+
+            <!-- ================================================================
+                 1. OVERVIEW — OPERATIONS PAGE
+                 ================================================================ -->
+            <section class="console-view active" id="view-overview">
+                <div class="editorial-header">
+                    <div>
+                        <div class="editorial-kicker">M2.7 FORENSIC OPERATIONS REGISTRY</div>
+                        <h1 class="editorial-title">TRANSACTION INTEGRITY</h1>
+                        <p class="editorial-desc">
+                            Scenario-driven invariant testing and distributed transaction verification across synthetic B2B travel booking, payment, and supplier reconciliation pipelines.
+                        </p>
+                    </div>
+                    <div>
+                        <button class="btn-action-sm btn-retest" onclick="switchView('workspace')">
+                            ▶ Open Execution Console
+                        </button>
+                    </div>
+                </div>
+
+                <!-- HORIZONTAL METRICS STRIP -->
+                <div class="metrics-strip">
+                    <div class="metric-cell">
+                        <div class="metric-label">
+                            <span>TOTAL EXECUTIONS</span>
+                            <span class="mono">TX-RUN</span>
+                        </div>
+                        <div class="metric-val mono" id="stat-total-executions">0</div>
+                        <div class="metric-sub">Recorded transaction traces</div>
+                    </div>
+                    <div class="metric-cell">
+                        <div class="metric-label">
+                            <span>CONFIRMED VULNERABILITIES</span>
+                            <span class="text-crit mono">INV-FAIL</span>
+                        </div>
+                        <div class="metric-val mono text-crit" id="stat-confirmed-findings">0</div>
+                        <div class="metric-sub">Verified invariant violations</div>
+                    </div>
+                    <div class="metric-cell">
+                        <div class="metric-label">
+                            <span>CRITICAL / HIGH SEVERITY</span>
+                            <span class="mono">CVSS-EQ</span>
+                        </div>
+                        <div class="metric-val mono" id="stat-critical-high">0 / 0</div>
+                        <div class="metric-sub">High financial or inventory drift</div>
+                    </div>
+                    <div class="metric-cell">
+                        <div class="metric-label">
+                            <span>VERIFIED RETESTS</span>
+                            <span class="text-pass mono">PASS-RATE</span>
+                        </div>
+                        <div class="metric-val mono text-pass" id="stat-successful-retests">0</div>
+                        <div class="metric-sub">Remediated in fixed mode</div>
+                    </div>
+                </div>
+
+                <!-- MAIN EXECUTION REGISTRY TABLE -->
+                <div class="table-wrapper">
+                    <div class="table-header-bar">
+                        <span class="table-title">Execution Registry &bull; Transaction Audit Log</span>
+                        <span class="table-meta" id="table-exec-count">Showing recorded executions</span>
+                    </div>
+                    <table class="data-table" id="overview-executions-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">Execution ID</th>
+                                <th>Scenario</th>
+                                <th style="width: 100px;">Mode</th>
+                                <th>Monitored Invariant</th>
+                                <th style="width: 140px;">Result / Status</th>
+                                <th style="width: 90px;">Latency</th>
+                                <th style="width: 120px;">Timestamp</th>
+                                <th style="width: 80px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overview-table-body">
+                            <tr>
+                                <td colspan="8" style="text-align:center; padding: 20px; color: var(--text-muted);">
+                                    Loading execution telemetry...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- INVARIANT HEALTH MATRIX -->
+                <div class="table-wrapper">
+                    <div class="table-header-bar">
+                        <span class="table-title">Invariant Compliance Matrix &bull; Travel-Specific Assertions</span>
+                        <span class="table-meta">Formal Ground Truth Oracles</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 90px;">Invariant</th>
+                                <th style="width: 180px;">Semantic Domain</th>
+                                <th>Predicate Condition</th>
+                                <th>Detection Method</th>
+                                <th style="width: 140px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="mono font-bold">INV-5.2</td>
+                                <td>Booking Intent Uniqueness</td>
+                                <td>Exactly 1 confirmed supplier reservation exists per logical booking intent</td>
+                                <td>Supplier reservation record inspection + Oracle intent count</td>
+                                <td><span class="status-badge status-pass">VERIFIED ENFORCEMENT</span></td>
+                            </tr>
+                            <tr>
+                                <td class="mono font-bold">INV-5.3</td>
+                                <td>Webhook Idempotency</td>
+                                <td>Replayed refund webhooks produce exactly 1 ledger entry and 1 balance debit</td>
+                                <td>Signed journal transaction hash deduplication</td>
+                                <td><span class="status-badge status-pass">VERIFIED ENFORCEMENT</span></td>
+                            </tr>
+                            <tr>
+                                <td class="mono font-bold">INV-5.4</td>
+                                <td>Voucher Entitlement</td>
+                                <td>Issued travel vouchers must not exceed total captured booking consideration</td>
+                                <td>Entitlement bound verification</td>
+                                <td><span class="status-badge status-pass">VERIFIED ENFORCEMENT</span></td>
+                            </tr>
+                            <tr>
+                                <td class="mono font-bold">INV-5.5</td>
+                                <td>Refund Boundedness</td>
+                                <td>Total refunded amount &le; total captured booking consideration (no excess drain)</td>
+                                <td>Aggregated journal ledger balance delta check</td>
+                                <td><span class="status-badge status-pass">VERIFIED ENFORCEMENT</span></td>
+                            </tr>
+                            <tr>
+                                <td class="mono font-bold">INV-5.7</td>
+                                <td>Financial Ledger Consistency</td>
+                                <td>Double-entry debit equals credit across all agency/supplier ledger balances</td>
+                                <td>Cross-ledger reconciliation (deferred to M3)</td>
+                                <td><span class="status-badge status-neutral">DEFERRED (M3)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 2. SCENARIO LIBRARY — CATALOGUE
+                 ================================================================ -->
+            <section class="console-view" id="view-scenarios">
+                <div class="editorial-header">
+                    <div>
+                        <div class="editorial-kicker">SCENARIO CATALOGUE</div>
+                        <h1 class="editorial-title">Transaction Fault Injection Catalogue</h1>
+                        <p class="editorial-desc">
+                            Select a scenario to inspect its invariant contracts or dispatch an execution directly into the forensic workspace.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-header-bar">
+                        <span class="table-title">Available Security Scenarios</span>
+                        <span class="table-meta">3 Supported Scenarios</span>
+                    </div>
+
+                    <table class="catalogue-table">
+                        <tbody>
+                            <!-- ROW 1: SCN-TIMEOUT-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-TIMEOUT-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">CRITICAL</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Ambiguous Commit-Then-Timeout</div>
+                                    <div class="scen-desc">
+                                        Simulates supplier committing a hotel reservation before dropping the connection. In vulnerable mode, a blind retry causes duplicate supplier booking and double inventory commitment for one logical booking intent.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-5.2: Booking Intent Uniqueness</span>
+                                        <span class="status-badge status-neutral">CWE-675: Multiple Operations</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-TIMEOUT-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-TIMEOUT-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 2: SCN-WEBHOOK-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-WEBHOOK-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">HIGH</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Duplicate Refund Webhook Replay</div>
+                                    <div class="scen-desc">
+                                        Replays supplier cancellation and refund webhook multiple times. In vulnerable mode, lack of deduplication triggers repeated credit entries, causing excess cash drain exceeding original booking payment.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-5.3: Webhook Idempotency</span>
+                                        <span class="status-badge status-tech">INV-5.5: Refund Boundedness</span>
+                                        <span class="status-badge status-neutral">CWE-841: Workflow Bypass</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-WEBHOOK-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-WEBHOOK-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 3: SCN-OUTBOX-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-OUTBOX-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-pass">DEFENSIVE</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Multi-Supplier Coordinated Outbox</div>
+                                    <div class="scen-desc">
+                                        Executes multi-room split booking across heterogeneous suppliers (Expedia + Hotelbeds) using durable transactional outbox pattern, lease fencing, and attempt tracking.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">Parent Stay Coverage</span>
+                                        <span class="status-badge status-tech">Monotonic Fencing Tokens</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-OUTBOX-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-OUTBOX-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 4: SCN-WALLET-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-WALLET-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">CRITICAL</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Agency Wallet Concurrency & Double-Spend</div>
+                                    <div class="scen-desc">
+                                        Simulates concurrent hold requests exceeding available credit via TOCTOU race conditions. Vulnerable mode drives balance negative; fixed mode enforces atomic check-and-reserve.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-5.1: Non-Negative Balance</span>
+                                        <span class="status-badge status-tech">INV-5.1: Wallet Balance & Hold Bounds</span>
+                                        <span class="status-badge status-neutral">CWE-362: Race Condition</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-WALLET-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-WALLET-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 5: SCN-RACE-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-RACE-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">HIGH</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Cancellation vs Delayed Supplier Confirmation</div>
+                                    <div class="scen-desc">
+                                        Simulates guest cancellation racing against late supplier confirmation. Vulnerable mode resurrects cancelled booking into an active voucher; fixed mode enforces terminal state fencing.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-5.4: Voucher Entitlement Preconditions</span>
+                                        <span class="status-badge status-tech">INV-5.6: State Transition Validity</span>
+                                        <span class="status-badge status-neutral">CWE-670: Failure Recovery</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-RACE-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-RACE-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 6: SCN-BOLA-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-BOLA-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">CRITICAL</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Cross-Agency BOLA / IDOR Tenant Isolation</div>
+                                    <div class="scen-desc">
+                                        Tests authenticated tenant boundary enforcement across travel agency dossiers. Vulnerable mode permits cross-agency record exfiltration; fixed mode enforces strict tenant scoping.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-AUTH-01: Cross-Tenant Booking Boundary</span>
+                                        <span class="status-badge status-neutral">CWE-639: IDOR / BOLA</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-BOLA-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-BOLA-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 7: SCN-PRIV-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-PRIV-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">HIGH</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Sub-Agent Privilege Escalation via Deposit</div>
+                                    <div class="scen-desc">
+                                        Simulates unprivileged sub-agent attempting to invoke financial credit operations. Vulnerable mode accepts unauthorized wallet deposits; fixed mode enforces RBAC permission gates.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-AUTH-02: Role-Based Financial Authorization</span>
+                                        <span class="status-badge status-neutral">CWE-269: Privilege Escalation</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-PRIV-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-PRIV-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 8: SCN-TAMPER-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-TAMPER-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">CRITICAL</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Client-Side Fare, Markup & Currency Tampering</div>
+                                    <div class="scen-desc">
+                                        Modifies payment amounts and currency client-side during checkout. Vulnerable mode blindly books at tampered rates; fixed mode enforces server-side authoritative quote integrity.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-PRICE-01: Server-Side Quote Integrity</span>
+                                        <span class="status-badge status-neutral">CWE-472: Price Parameter Tampering</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-TAMPER-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-TAMPER-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 9: SCN-SKIP-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-SKIP-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">CRITICAL</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Payment-Step Skipping / Unentitled Voucher Issuance</div>
+                                    <div class="scen-desc">
+                                        Attempts direct voucher generation from HELD state bypassing payment processing. Vulnerable mode issues live vouchers without payment capture; fixed mode verifies payment settlement preconditions.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-5.4: Voucher Entitlement Preconditions</span>
+                                        <span class="status-badge status-neutral">CWE-841: Workflow Bypass</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-SKIP-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-SKIP-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 10: SCN-ABUSE-001 -->
+                            <tr class="catalogue-row">
+                                <td class="catalogue-cell-id">
+                                    <span class="scen-code">SCN-ABUSE-001</span>
+                                    <span class="scen-avail">SYNTHETIC TESTBED</span>
+                                    <div style="margin-top:6px;">
+                                        <span class="status-badge status-crit">HIGH</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-body">
+                                    <div class="scen-name">Cancel-Rebook-Refund Cumulative Overflow Abuse</div>
+                                    <div class="scen-desc">
+                                        Attempts to issue secondary cancellation refunds that exceed the initial captured payment. Vulnerable mode drains funds via unconstrained refunds; fixed mode enforces strict cumulative boundedness.
+                                    </div>
+                                    <div class="scen-invariants">
+                                        <span class="status-badge status-tech">INV-5.5: Strict Cumulative Refund Boundedness</span>
+                                        <span class="status-badge status-neutral">CWE-840: Business Logic Overflow</span>
+                                    </div>
+                                </td>
+                                <td class="catalogue-cell-actions">
+                                    <button class="btn-action-sm btn-retest" onclick="launchScenario('SCN-ABUSE-001', 'VULNERABLE')">
+                                        ▶ Run Vulnerable
+                                    </button>
+                                    <button class="btn-action-sm" style="margin-top:6px;" onclick="launchScenario('SCN-ABUSE-001', 'FIXED')">
+                                        ✓ Run Fixed
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 3. EXECUTION WORKSPACE — 3-PANE FORENSIC WORKBENCH
+                 ================================================================ -->
+            <section class="console-view" id="view-workspace">
+                <div class="workbench-layout">
+
+                    <!-- PANE 1: CONTROL STATION (22%) -->
+                    <div class="pane-control">
+                        <div class="pane-header">Control Station</div>
+                        <div class="pane-body">
+                            <div class="control-block">
+                                <label class="control-label">Target Platform</label>
+                                <select class="form-select" id="runner-target-select" onchange="onTargetSelectChange()">
+                                    <option value="target_a">Target A (Reference Platform)</option>
+                                    <option value="travel_sandbox_b">Target B (TravelSandboxB)</option>
+                                </select>
+                            </div>
+
+                            <div class="control-block">
+                                <label class="control-label">Target Scenario</label>
+                                <select class="form-select" id="runner-scenario-select" onchange="onScenarioSelectChange()">
+                                    <option value="SCN-TIMEOUT-001">SCN-TIMEOUT-001 (Commit-Then-Timeout)</option>
+                                    <option value="SCN-WEBHOOK-001">SCN-WEBHOOK-001 (Refund Webhook Replay)</option>
+                                    <option value="SCN-OUTBOX-001">SCN-OUTBOX-001 (Multi-Supplier Outbox)</option>
+                                    <option value="SCN-WALLET-001">SCN-WALLET-001 (Wallet Concurrency & Double-Spend)</option>
+                                    <option value="SCN-RACE-001">SCN-RACE-001 (Cancellation vs Delayed Confirmation)</option>
+                                    <option value="SCN-BOLA-001">SCN-BOLA-001 (Cross-Agency BOLA/IDOR Boundary)</option>
+                                    <option value="SCN-PRIV-001">SCN-PRIV-001 (Sub-Agent Privilege Escalation)</option>
+                                    <option value="SCN-TAMPER-001">SCN-TAMPER-001 (Fare, Markup & Currency Tampering)</option>
+                                    <option value="SCN-SKIP-001">SCN-SKIP-001 (Payment-Step Skipping)</option>
+                                    <option value="SCN-ABUSE-001">SCN-ABUSE-001 (Cancel-Rebook-Refund Abuse)</option>
+                                </select>
+                            </div>
+
+                            <div class="control-block">
+                                <label class="control-label">Execution Mode</label>
+                                <div class="segmented-mode">
+                                    <button class="mode-btn active-vuln" id="btn-mode-vuln" onclick="setMode('VULNERABLE')">
+                                        VULNERABLE
+                                    </button>
+                                    <button class="mode-btn" id="btn-mode-fixed" onclick="setMode('FIXED')">
+                                        FIXED
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="control-block">
+                                <button class="btn-execute" id="btn-run-scenario" onclick="triggerRunScenario()">
+                                    ▶ Execute Transaction
+                                </button>
+                            </div>
+
+                            <div class="exec-status-box" id="exec-status-container">
+                                <div class="exec-status-header">Current Execution</div>
+                                <div style="margin-bottom: 5px;">
+                                    <span class="status-badge status-crit" id="live-exec-status">READY</span>
+                                </div>
+                                <div class="mono" style="font-size:11px;" id="live-exec-id">ID: None</div>
+                                <div class="mono" style="font-size:10.5px; color:var(--text-secondary);" id="live-exec-target">Target: Target A</div>
+                                <div class="mono" style="font-size:10.5px; color:var(--text-muted);" id="live-exec-latency">Latency: -- ms</div>
+                            </div>
+
+                            <div style="margin-top: 14px; font-size: 11px; color: var(--text-secondary); line-height: 1.4;">
+                                <strong>Operator Note:</strong> Vulnerable mode injects client timeout faults and disables idempotency tokens. Fixed mode enforces idempotent reconciliation and monotonic token fencing.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PANE 2: CHRONOLOGICAL EVENT STREAM (48%) -->
+                    <div class="pane-timeline">
+                        <div class="pane-header" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Chronological Transaction Timeline</span>
+                            <span class="mono" style="font-size:10px; font-weight:normal;" id="timeline-event-count">0 Events</span>
+                        </div>
+                        <div class="timeline-stream">
+                            <div class="stream-track" id="stream-events-track">
+                                <div style="color:var(--text-muted); font-size:12px; padding: 20px 0;">
+                                    Loading transaction timeline...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PANE 3: DOCKED INSPECTION PANEL (30%) -->
+                    <div class="pane-inspector">
+                        <div class="pane-header">Event &amp; State Inspector</div>
+                        <div class="inspector-content" id="inspector-content-area">
+                            <div style="color:var(--text-muted); font-size:12px; padding: 20px 0; text-align:center;">
+                                Select any event in the timeline to inspect its underlying database records and assertion state.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- BOTTOM INVARIANT EVALUATION REGION -->
+                <div class="workbench-footer">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span>INVARIANT EVALUATION:</span>
+                        <span id="footer-invariant-name" class="mono text-tech">INV-5.2: Booking Intent Uniqueness</span>
+                    </div>
+                    <div id="footer-invariant-result">
+                        <span class="status-badge status-crit">VIOLATION DETECTED</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 4. FINDINGS REGISTRY — TABLE + DOCKED INSPECTOR
+                 ================================================================ -->
+            <section class="console-view" id="view-findings">
+                <div class="findings-workbench">
+                    <div class="findings-list-pane">
+                        <div class="table-header-bar">
+                            <span class="table-title">Confirmed Vulnerability Findings Registry</span>
+                            <span class="table-meta" id="findings-table-count">2 Confirmed Vulnerabilities</span>
+                        </div>
+
+                        <table class="data-table" id="findings-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px; white-space: nowrap;">Finding ID</th>
+                                    <th style="width: 85px; white-space: nowrap;">Severity</th>
+                                    <th style="min-width: 220px;">Finding Title</th>
+                                    <th style="width: 130px; white-space: nowrap;">Scenario</th>
+                                    <th style="width: 175px; white-space: nowrap;">Violated Invariant</th>
+                                    <th style="width: 85px; white-space: nowrap;">CWE</th>
+                                    <th style="width: 120px; white-space: nowrap;">Retest Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="findings-table-body">
+                                <tr>
+                                    <td colspan="7" style="text-align:center; padding: 20px; color:var(--text-muted);">
+                                        Loading findings registry...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="findings-inspect-pane" id="finding-detail-pane">
+                        <div class="pane-header">Finding Forensic Dossier</div>
+                        <div style="padding: 14px;" id="finding-detail-body">
+                            <div style="color:var(--text-muted); text-align:center; padding: 30px 0;">
+                                Select a finding from the registry to inspect root cause analysis, expected vs observed state, and execute retest.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 5. EVIDENCE — FORENSIC INSPECTOR (3-COLUMN SPLIT)
+                 ================================================================ -->
+            <section class="console-view" id="view-evidence">
+                <div class="evidence-layout">
+                    <!-- LEFT: TRACE SELECTOR -->
+                    <div class="evidence-left">
+                        <div class="pane-header">Recorded Traces</div>
+                        <div style="padding: 12px;">
+                            <label class="control-label">Select Trace</label>
+                            <select class="form-select" id="evidence-trace-select" onchange="onEvidenceTraceChange()">
+                                <option value="">Loading traces...</option>
+                            </select>
+                        </div>
+                        <div style="padding: 0 12px 12px 12px; font-size:10.5px; color:var(--text-muted);">
+                            Traces are stored immutably with ground-truth observations and cryptographic database states.
+                        </div>
+                    </div>
+
+                    <!-- CENTER: DARK GRAPHITE TERMINAL FOR RAW JSON -->
+                    <div class="evidence-center">
+                        <div class="dark-terminal-header">
+                            <span class="mono" id="evidence-payload-title">RAW TRANSACTION TELEMETRY</span>
+                            <button class="btn-terminal-action" onclick="copyRawJson()">Copy JSON</button>
+                        </div>
+                        <div class="raw-json-viewer" id="evidence-raw-viewer">
+                            // Select a trace on the left to inspect raw payload
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: INVARIANT PREDICATE BREAKDOWN -->
+                    <div class="evidence-right">
+                        <div class="pane-header">Predicate Evaluation</div>
+                        <div style="padding: 14px;" id="evidence-eval-body">
+                            <div style="color:var(--text-muted); text-align:center; padding: 30px 0;">
+                                Invariant predicate breakdown will display here.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 6. REPORTS & EXPORTS
+                 ================================================================ -->
+            <section class="console-view" id="view-reports">
+                <div class="editorial-header">
+                    <div>
+                        <div class="editorial-kicker">COMPLIANCE &bull; AUDIT EXPORTS</div>
+                        <h1 class="editorial-title">Forensic Reports &amp; Export Registry</h1>
+                        <p class="editorial-desc">
+                            Download tamper-evident security assessment artifacts, audit reports, and raw JSON telemetry bundles.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-header-bar">
+                        <span class="table-title">Available Export Artifacts</span>
+                        <span class="table-meta">Formal Security Documentation</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Format</th>
+                                <th>Artifact Document</th>
+                                <th>Scope</th>
+                                <th>Content Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="status-badge status-pass">HTML</span></td>
+                                <td><strong>Security Assessment Report</strong></td>
+                                <td>Full Testbed</td>
+                                <td>Standalone executive assessment with findings, root cause analysis, and remediation</td>
+                                <td>
+                                    <a class="btn-action-sm btn-retest" href="/api/reports/html" target="_blank">
+                                        View HTML Report
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="status-badge status-tech">JSON</span></td>
+                                <td><strong>Findings Telemetry Bundle</strong></td>
+                                <td>Security Registry</td>
+                                <td>Machine-readable vulnerability records conforming to Crosswire M2.4 schema</td>
+                                <td>
+                                    <a class="btn-action-sm" href="/api/reports/json" target="_blank">
+                                        Download JSON
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="status-badge status-neutral">JSON</span></td>
+                                <td><strong>Execution Traces Archive</strong></td>
+                                <td>Audit Ledger</td>
+                                <td>Full transaction timeline events, actor dispatches, and database assertions</td>
+                                <td>
+                                    <a class="btn-action-sm" href="/api/reports/traces" target="_blank">
+                                        Download Traces
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================================================================
+                 7. SYSTEM DIAGNOSTICS
+                 ================================================================ -->
+            <section class="console-view" id="view-diagnostics">
+                <div class="editorial-header">
+                    <div>
+                        <div class="editorial-kicker">ENGINE DIAGNOSTICS</div>
+                        <h1 class="editorial-title">Platform Architecture &amp; System Health</h1>
+                        <p class="editorial-desc">
+                            Diagnostic telemetry for synthetic target platform, SQLite database paths, outbox dispatcher, and test constraints.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-header-bar">
+                        <span class="table-title">System Configuration &bull; Target Specification</span>
+                        <span class="table-meta">Environment Verifications</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Configured Target</th>
+                                <th>Operational State</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Target Platform</td>
+                                <td class="mono">Synthetic B2B OTA</td>
+                                <td><span class="status-badge status-pass">ACTIVE</span></td>
+                                <td>Single-hotel, single-currency INR reservation model</td>
+                            </tr>
+                            <tr>
+                                <td>Database Ledger</td>
+                                <td class="mono">SQLite (In-Memory / File)</td>
+                                <td><span class="status-badge status-pass">CONNECTED</span></td>
+                                <td>Append-only observations with foreign-key attempts</td>
+                            </tr>
+                            <tr>
+                                <td>Outbox Engine</td>
+                                <td class="mono">M2.3B Transactional Outbox</td>
+                                <td><span class="status-badge status-pass">SYNCHRONIZED</span></td>
+                                <td>Monotonic fencing tokens + lease acquisition</td>
+                            </tr>
+                            <tr>
+                                <td>Invariant Evaluator</td>
+                                <td class="mono">Crosswire Ground Truth Oracle</td>
+                                <td><span class="status-badge status-pass">ONLINE</span></td>
+                                <td>INV-5.2, INV-5.3, INV-5.4, INV-5.5 active</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================================
+     CLIENT LOGIC & API INTEGRATION (REFINED FOR M2.7.1)
+     ============================================================================ -->
+<script>
+    // Global Application State
+    let currentScenarioId = 'SCN-TIMEOUT-001';
+    let currentMode = 'VULNERABLE';
+    let currentTargetId = 'target_a';
+    let cachedStats = null;
+    let cachedExecutions = [];
+    let cachedFindings = [];
+    let selectedEventIndex = 0;
+    let currentTraceData = null;
+
+    function onTargetSelectChange() {
+        const sel = document.getElementById('runner-target-select');
+        if (sel) {
+            currentTargetId = sel.value;
+            const topSel = document.getElementById('topbar-target-select');
+            if (topSel) topSel.value = currentTargetId;
+        }
+    }
+
+    function onTopBarTargetChange() {
+        const topSel = document.getElementById('topbar-target-select');
+        if (topSel) {
+            currentTargetId = topSel.value;
+            const sel = document.getElementById('runner-target-select');
+            if (sel) sel.value = currentTargetId;
+        }
+    }
+
+    // View Switching
+    function switchView(viewId, updateHash = true) {
+        if (updateHash && window.location.hash !== '#' + viewId) {
+            history.replaceState(null, null, '#' + viewId);
+        }
+
+        const titleMap = {
+            'overview': 'OVERVIEW',
+            'scenarios': 'SCENARIO LIBRARY',
+            'workspace': 'EXECUTIONS',
+            'findings': 'FINDINGS',
+            'evidence': 'EVIDENCE',
+            'reports': 'REPORTS',
+            'diagnostics': 'DIAGNOSTICS'
+        };
+        const titleEl = document.getElementById('topbar-section-title');
+        if (titleEl) titleEl.innerText = titleMap[viewId] || viewId.toUpperCase();
+
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const navEl = document.getElementById('nav-' + viewId);
+        if (navEl) navEl.classList.add('active');
+
+        document.querySelectorAll('.console-view').forEach(el => el.classList.remove('active'));
+        const viewEl = document.getElementById('view-' + viewId);
+        if (viewEl) viewEl.classList.add('active');
+
+        if (viewId === 'overview') loadOverviewData();
+        if (viewId === 'workspace') loadWorkspaceInitial();
+        if (viewId === 'findings') loadFindingsData();
+        if (viewId === 'evidence') loadEvidenceData();
+    }
+    window.switchTab = switchView;
+
+    // Mode Selector
+    function setMode(mode) {
+        currentMode = mode;
+        const btnVuln = document.getElementById('btn-mode-vuln');
+        const btnFixed = document.getElementById('btn-mode-fixed');
+        if (mode === 'VULNERABLE') {
+            btnVuln.className = 'mode-btn active-vuln';
+            btnFixed.className = 'mode-btn';
+        } else {
+            btnVuln.className = 'mode-btn';
+            btnFixed.className = 'mode-btn active-fixed';
+        }
+    }
+
+    // Launch Scenario from Catalogue
+    function launchScenario(scenId, mode) {
+        currentScenarioId = scenId;
+        setMode(mode);
+        const sel = document.getElementById('runner-scenario-select');
+        if (sel) sel.value = scenId;
+        switchView('workspace');
+        triggerRunScenario();
+    }
+
+    function onScenarioSelectChange() {
+        const sel = document.getElementById('runner-scenario-select');
+        if (sel) currentScenarioId = sel.value;
+    }
+
+    // Overview Telemetry Fetch
+    async function loadOverviewData() {
+        try {
+            const resp = await fetch('/api/stats');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            cachedStats = data;
+
+            document.getElementById('stat-total-executions').innerText = data.total_executions || 0;
+            document.getElementById('stat-confirmed-findings').innerText = data.confirmed_vulnerabilities || 0;
+            const crit = (data.severity_counts && data.severity_counts.CRITICAL) || 0;
+            const high = (data.severity_counts && data.severity_counts.HIGH) || 0;
+            document.getElementById('stat-critical-high').innerText = `${crit} / ${high}`;
+            document.getElementById('stat-successful-retests').innerText = data.successful_retests || 0;
+
+            const tbody = document.getElementById('overview-table-body');
+            const recents = data.recent_activity || [];
+            cachedExecutions = recents;
+
+            if (recents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No executions recorded. Run a scenario from the catalogue.</td></tr>`;
+                return;
+            }
+
+            document.getElementById('table-exec-count').innerText = `Displaying ${recents.length} recent executions`;
+
+            let rows = '';
+            recents.forEach(ex => {
+                const statusBadge = ex.status === 'VULNERABILITY_CONFIRMED'
+                    ? `<span class="status-badge status-crit">VULN CONFIRMED</span>`
+                    : `<span class="status-badge status-pass">${ex.status.replace(/_/g, ' ')}</span>`;
+                const modeBadge = ex.mode === 'VULNERABLE'
+                    ? `<span class="status-badge status-crit">${ex.mode}</span>`
+                    : `<span class="status-badge status-pass">${ex.mode}</span>`;
+                const invList = (ex.invariants_checked || []).join(', ') || 'N/A';
+                const timeStr = ex.timestamp ? ex.timestamp.substring(11, 19) + ' UTC' : '--:--:--';
+
+                const targetLabel = ex.target_id === 'travel_sandbox_b'
+                    ? `<span class="status-badge status-tech" style="font-size:10px; margin-left:6px;">Target B</span>`
+                    : `<span class="status-badge status-neutral" style="font-size:10px; margin-left:6px;">Target A</span>`;
+
+                rows += `
+                    <tr onclick="inspectExecutionDirect('${ex.execution_id}')">
+                        <td class="mono font-bold">${ex.execution_id}</td>
+                        <td>${ex.scenario_name || ex.scenario_id} ${targetLabel}</td>
+                        <td>${modeBadge}</td>
+                        <td class="mono" style="font-size:11px;">${invList}</td>
+                        <td>${statusBadge}</td>
+                        <td class="mono">${ex.duration_ms || 0} ms</td>
+                        <td class="mono" style="color:var(--text-muted);">${timeStr}</td>
+                        <td>
+                            <button class="btn-action-sm" onclick="event.stopPropagation(); inspectExecutionDirect('${ex.execution_id}')">
+                                Inspect
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = rows;
+
+        } catch (err) {
+            console.error('Failed to load stats:', err);
+        }
+    }
+
+    // Direct Inspection Jump
+    function inspectExecutionDirect(execId) {
+        switchView('workspace');
+        loadWorkspaceWithExecution(execId);
+    }
+
+    // Run Scenario Trigger
+    async function triggerRunScenario() {
+        const btn = document.getElementById('btn-run-scenario');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = 'Executing...';
+        }
+
+        try {
+            const resp = await fetch('/api/scenarios/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    scenario_id: currentScenarioId,
+                    mode: currentMode,
+                    target_id: currentTargetId
+                })
+            });
+
+            if (!resp.ok) {
+                const errJson = await resp.json().catch(() => ({}));
+                throw new Error(errJson.detail || `HTTP Error: ${resp.status}`);
+            }
+            const data = await resp.json();
+
+            renderLiveExecution(data);
+            loadOverviewData();
+
+        } catch (err) {
+            console.error('Execution run failed:', err);
+            alert('Execution failed: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = '▶ Execute Transaction';
+            }
+        }
+    }
+
+    function renderLiveExecution(data) {
+        currentTraceData = data;
+        const statusPill = document.getElementById('live-exec-status');
+        const idEl = document.getElementById('live-exec-id');
+        const latEl = document.getElementById('live-exec-latency');
+        const targetEl = document.getElementById('live-exec-target');
+
+        if (data.status === 'VULNERABILITY_CONFIRMED') {
+            statusPill.className = 'status-badge status-crit';
+            statusPill.innerText = 'VULN CONFIRMED';
+        } else {
+            statusPill.className = 'status-badge status-pass';
+            statusPill.innerText = data.status.replace(/_/g, ' ');
+        }
+        idEl.innerText = `ID: ${data.execution_id}`;
+        latEl.innerText = `Latency: ${data.duration_ms} ms`;
+        if (targetEl) {
+            const tName = data.target_name || (data.target_id === 'travel_sandbox_b' ? 'TravelSandboxB (Target B)' : 'Reference Platform (Target A)');
+            targetEl.innerText = `Target: ${tName}`;
+        }
+        idEl.innerText = `ID: ${data.execution_id}`;
+        latEl.innerText = `Latency: ${data.duration_ms} ms`;
+
+        const invName = document.getElementById('footer-invariant-name');
+        const invRes = document.getElementById('footer-invariant-result');
+        if (invName) invName.innerText = (data.invariants_checked || []).join(', ') || 'Invariant Evaluation';
+        if (invRes) {
+            invRes.innerHTML = data.invariants_passed
+                ? `<span class="status-badge status-pass">ALL INVARIANTS PASSED</span>`
+                : `<span class="status-badge status-crit">INVARIANT VIOLATION DETECTED</span>`;
+        }
+
+        renderTimelineStream(data.events || [], data);
+    }
+
+    // Render Timeline Stream (Continuous line, no floating cards)
+    function renderTimelineStream(events, execData) {
+        const track = document.getElementById('stream-events-track');
+        const countEl = document.getElementById('timeline-event-count');
+        if (countEl) countEl.innerText = `${events.length} Events`;
+
+        if (!events || events.length === 0) {
+            track.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:20px 0;">No events in trace.</div>`;
+            return;
+        }
+
+        let html = '';
+        events.forEach((evt, idx) => {
+            let nodeClass = 'stream-node';
+            if (evt.status === 'CRITICAL') nodeClass += ' node-crit';
+            else if (evt.status === 'WARNING') nodeClass += ' node-warn';
+            else if (evt.status === 'SUCCESS') nodeClass += ' node-pass';
+            else nodeClass += ' node-tech';
+
+            let actorName = 'AGGREGATOR';
+            let actorClass = 'stream-actor actor-aggregator';
+            const titleUpper = (evt.title || '').toUpperCase();
+            if (titleUpper.includes('SUPPLIER')) {
+                actorName = 'SUPPLIER';
+                actorClass = 'stream-actor actor-supplier';
+            } else if (titleUpper.includes('REFUND') || titleUpper.includes('WALLET') || titleUpper.includes('PAYMENT')) {
+                actorName = 'PAYMENT';
+                actorClass = 'stream-actor actor-payment';
+            } else if (titleUpper.includes('INVARIANT') || titleUpper.includes('ORACLE') || titleUpper.includes('VERIFIED')) {
+                actorName = 'ORACLE';
+                actorClass = 'stream-actor actor-oracle';
+            }
+
+            const timeStr = evt.timestamp ? evt.timestamp.substring(11, 23) : 'T0';
+
+            html += `
+                <div class="stream-item ${idx === selectedEventIndex ? 'active-event' : ''}" onclick="selectTimelineEvent(${idx})">
+                    <span class="${nodeClass}"></span>
+                    <div class="stream-meta">
+                        <span class="stream-time">${timeStr}</span>
+                        <span class="${actorClass}">${actorName}</span>
+                        <span class="status-badge ${evt.status === 'CRITICAL' ? 'status-crit' : (evt.status === 'SUCCESS' ? 'status-pass' : 'status-neutral')}">${evt.status}</span>
+                    </div>
+                    <div class="stream-title">${escapeHtml(evt.title)}</div>
+                    <div class="stream-detail">${escapeHtml(evt.detail)}</div>
+                </div>
+            `;
+        });
+
+        track.innerHTML = html;
+        selectTimelineEvent(0);
+    }
+
+    function selectTimelineEvent(idx) {
+        selectedEventIndex = idx;
+        document.querySelectorAll('.stream-item').forEach((el, i) => {
+            if (i === idx) el.classList.add('active-event');
+            else el.classList.remove('active-event');
+        });
+
+        const insp = document.getElementById('inspector-content-area');
+        if (!currentTraceData || !currentTraceData.events || !currentTraceData.events[idx]) {
+            insp.innerHTML = `<div style="color:var(--text-muted); padding:20px;">No event details available.</div>`;
+            return;
+        }
+
+        const evt = currentTraceData.events[idx];
+        const raw = currentTraceData.raw_data || {};
+        const resIds = raw.supplier_reservation_ids || [];
+
+        insp.innerHTML = `
+            <div class="inspector-row">
+                <div class="inspector-prop">EVENT IDENTITY &bull; EXECUTION</div>
+                <div class="inspector-val mono font-bold">${evt.event_id || 'EVT-' + idx} &bull; ${currentTraceData.execution_id}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">EVENT TITLE</div>
+                <div class="inspector-val font-bold">${escapeHtml(evt.title)}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">EVENT DETAIL</div>
+                <div class="inspector-val">${escapeHtml(evt.detail)}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">LOGICAL INTENT ID</div>
+                <div class="inspector-val mono">${currentTraceData.intent_id || 'N/A'}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">GROUND TRUTH OBSERVATIONS</div>
+                <div class="inspector-val mono" style="font-size:11px;">
+                    Supplier Reservations: ${raw.supplier_reservation_count !== undefined ? raw.supplier_reservation_count : (raw.total_reservations_created || resIds.length || 1)}<br>
+                    Reservation IDs: ${resIds.length > 0 ? resIds.join(', ') : 'None registered'}<br>
+                    Retry Count: ${raw.retry_count !== undefined ? raw.retry_count : 0}
+                </div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">EVENT METADATA (JSON)</div>
+                <pre class="mono" style="background:var(--surface-sunken); padding:8px; font-size:10.5px; overflow-x:auto;">${escapeHtml(JSON.stringify(evt.metadata || {}, null, 2))}</pre>
+            </div>
+        `;
+    }
+
+    async function loadWorkspaceInitial() {
+        if (currentTraceData) return;
+        try {
+            const resp = await fetch('/api/executions');
+            if (!resp.ok) return;
+            const list = await resp.json();
+            if (list && list.length > 0) {
+                renderLiveExecution(list[0]);
+            }
+        } catch (e) {
+            console.error('Failed to load initial workspace:', e);
+        }
+    }
+
+    async function loadWorkspaceWithExecution(execId) {
+        try {
+            const resp = await fetch(`/api/executions/${execId}`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+            renderLiveExecution(data);
+        } catch (e) {
+            console.error('Failed to load execution detail:', e);
+        }
+    }
+
+    // Findings Registry
+    async function loadFindingsData() {
+        try {
+            const resp = await fetch('/api/findings');
+            if (!resp.ok) return;
+            const list = await resp.json();
+            cachedFindings = list;
+
+            const tbody = document.getElementById('findings-table-body');
+            document.getElementById('findings-table-count').innerText = `${list.length} Confirmed Vulnerabilities`;
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">No findings recorded.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            list.forEach((f, idx) => {
+                const sevBadge = f.severity === 'CRITICAL'
+                    ? `<span class="status-badge status-crit">CRITICAL</span>`
+                    : `<span class="status-badge status-crit">${f.severity}</span>`;
+                const retestBadge = f.retest_result && f.retest_result.passed
+                    ? `<span class="status-badge status-pass">VERIFIED FIXED</span>`
+                    : `<span class="status-badge status-crit">UNRESOLVED</span>`;
+
+                // Compact CWE Identifier (e.g., CWE-675)
+                const cweCompact = (f.cwe || 'CWE-675').split(':')[0].trim();
+
+                html += `
+                    <tr onclick="selectFindingRow(${idx})" class="${idx === 0 ? 'active-row' : ''}">
+                        <td class="mono font-bold" style="white-space: nowrap;">${f.finding_id}</td>
+                        <td style="white-space: nowrap;">${sevBadge}</td>
+                        <td class="font-bold" style="white-space: normal; line-height: 1.35;">${f.title}</td>
+                        <td class="mono" style="white-space: nowrap;">${f.scenario_id}</td>
+                        <td class="mono" style="font-size:11px; white-space: nowrap;">${f.violated_invariant}</td>
+                        <td class="mono" style="white-space: nowrap;">${cweCompact}</td>
+                        <td style="white-space: nowrap;">${retestBadge}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            selectFindingRow(0);
+
+        } catch (e) {
+            console.error('Failed to load findings:', e);
+        }
+    }
+
+    function selectFindingRow(idx) {
+        document.querySelectorAll('#findings-table-body tr').forEach((r, i) => {
+            if (i === idx) r.classList.add('active-row');
+            else r.classList.remove('active-row');
+        });
+
+        const f = cachedFindings[idx];
+        const body = document.getElementById('finding-detail-body');
+        if (!f) return;
+
+        const retestInfo = f.retest_result
+            ? `<div style="margin-top:12px; padding:10px; background:rgba(53,105,79,0.08); border:1px solid var(--success);">
+                   <strong style="color:var(--success);">✓ RETEST VERIFIED PASSED</strong><br>
+                   <span class="mono" style="font-size:11px;">Timestamp: ${f.retest_result.timestamp || 'N/A'}<br>Execution: ${f.retest_result.retest_execution_id || 'N/A'}</span>
+               </div>`
+            : `<button class="btn-action-sm btn-retest" style="width:100%; justify-content:center; margin-top:14px;" onclick="triggerFindingRetest('${f.finding_id}')">
+                   ▶ Retest with Fixed Protocol
+               </button>`;
+
+        // Full CWE Description in the Forensic Dossier
+        const cweFull = f.cwe && f.cwe.includes(':') ? f.cwe : (f.cwe ? `${f.cwe}: Multiple Operations on Resource in Single-Operation Context` : 'CWE-675: Multiple Operations on Resource in Single-Operation Context');
+
+        body.innerHTML = `
+            <div class="inspector-row">
+                <div class="inspector-prop">FINDING IDENTITY</div>
+                <div class="inspector-val mono font-bold">${f.finding_id} • ${f.severity}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">TITLE &amp; CLASSIFICATION</div>
+                <div class="inspector-val font-bold">${escapeHtml(f.title)}</div>
+                <div class="mono" style="font-size:11px; color:var(--text-muted); margin-top:3px;">${escapeHtml(cweFull)}</div>
+                <div class="mono" style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Invariant: ${f.violated_invariant}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">ROOT CAUSE SUMMARY</div>
+                <div class="inspector-val">${escapeHtml(f.technical_description || 'Root cause identified in state transitions.')}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">EXPECTED VS. OBSERVED STATE</div>
+                <table class="state-diff-table">
+                    <thead>
+                        <tr><th>Dimension</th><th>Expected</th><th>Observed</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>State</td>
+                            <td class="diff-expected">${escapeHtml(f.expected_outcome || 'Single reservation')}</td>
+                            <td class="diff-observed">${escapeHtml(f.actual_outcome || 'Duplicate created')}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">EVIDENCE LINKAGE</div>
+                <div class="inspector-val mono" style="font-size:11px;">
+                    Intent: ${f.logical_intent_id || 'N/A'}<br>
+                    Reservations: ${(f.supplier_reservation_ids || []).join(', ') || 'N/A'}
+                </div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">REMEDIATION GUIDANCE</div>
+                <div class="inspector-val" style="font-size:12px;">${escapeHtml(f.remediation_guidance || 'Enforce idempotency and query-before-retry.')}</div>
+            </div>
+            <div class="inspector-row">
+                <div class="inspector-prop">RETEST VERIFICATION</div>
+                ${retestInfo}
+            </div>
+        `;
+    }
+
+    async function triggerFindingRetest(findingId) {
+        try {
+            const resp = await fetch(`/api/findings/${findingId}/retest`, { method: 'POST' });
+            if (!resp.ok) throw new Error(`HTTP Error ${resp.status}`);
+            const data = await resp.json();
+            alert(`Retest Succeeded! Finding status updated: ${data.message || 'Fixed'}`);
+            loadFindingsData();
+            loadOverviewData();
+        } catch (e) {
+            alert('Retest failed: ' + e.message);
+        }
+    }
+
+    // Evidence Telemetry
+    async function loadEvidenceData() {
+        try {
+            const resp = await fetch('/api/executions');
+            if (!resp.ok) return;
+            const list = await resp.json();
+
+            const sel = document.getElementById('evidence-trace-select');
+            let opts = '';
+            list.forEach(ex => {
+                opts += `<option value="${ex.execution_id}">${ex.execution_id} • ${ex.scenario_id} (${ex.mode})</option>`;
+            });
+            sel.innerHTML = opts || `<option value="">No traces available</option>`;
+            onEvidenceTraceChange();
+
+        } catch (e) {
+            console.error('Failed to load evidence traces:', e);
+        }
+    }
+
+    async function onEvidenceTraceChange() {
+        const sel = document.getElementById('evidence-trace-select');
+        const viewer = document.getElementById('evidence-raw-viewer');
+        const titleEl = document.getElementById('evidence-payload-title');
+        const evalBody = document.getElementById('evidence-eval-body');
+
+        if (!sel || !sel.value) return;
+
+        try {
+            const resp = await fetch(`/api/executions/${sel.value}`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+
+            // Clean unicode bullet (no literal &bull;)
+            if (titleEl) titleEl.textContent = `TRACE: ${data.execution_id} • ${data.scenario_id} (${data.mode})`;
+            if (viewer) viewer.textContent = JSON.stringify(data, null, 2);
+
+            if (evalBody) {
+                const passClass = data.invariants_passed ? 'status-pass' : 'status-crit';
+                const passText = data.invariants_passed ? 'PASSED (SATISFIED)' : 'VIOLATION DETECTED';
+
+                // Real cryptographic evidence hashes if available
+                let hashDisplay = 'Verified via Database Ground Truth';
+                if (data.raw_data && data.raw_data.journal_hash) {
+                    hashDisplay = `0x${data.raw_data.journal_hash}`;
+                } else if (data.finding_id) {
+                    hashDisplay = `Linked Finding: ${data.finding_id}`;
+                }
+
+                evalBody.innerHTML = `
+                    <div class="inspector-row">
+                        <div class="inspector-prop">INVARIANTS EVALUATED</div>
+                        <div class="inspector-val mono font-bold">${(data.invariants_checked || []).join('<br>')}</div>
+                    </div>
+                    <div class="inspector-row">
+                        <div class="inspector-prop">EVALUATION VERDICT</div>
+                        <span class="status-badge ${passClass}">${passText}</span>
+                    </div>
+                    <div class="inspector-row">
+                        <div class="inspector-prop">LOGICAL INTENT</div>
+                        <div class="inspector-val mono">${data.intent_id || 'N/A'}</div>
+                    </div>
+                    <div class="inspector-row">
+                        <div class="inspector-prop">EVIDENCE HASH / PROOF</div>
+                        <div class="inspector-val mono" style="font-size:11px; word-break:break-all;">${hashDisplay}</div>
+                    </div>
+                    <div class="inspector-row">
+                        <div class="inspector-prop">EXECUTION DURATION</div>
+                        <div class="inspector-val mono">${data.duration_ms || 0} ms</div>
+                    </div>
+                    <div class="inspector-row">
+                        <div class="inspector-prop">EVENT LOG ENTRIES</div>
+                        <div class="inspector-val mono">${(data.events || []).length} registered checkpoints</div>
+                    </div>
+                `;
+            }
+        } catch (e) {
+            if (viewer) viewer.textContent = 'Error loading trace: ' + e.message;
+        }
+    }
+
+    function copyRawJson() {
+        const viewer = document.getElementById('evidence-raw-viewer');
+        if (viewer) {
+            navigator.clipboard.writeText(viewer.textContent);
+            alert('Trace JSON copied to clipboard!');
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Initial Bootstrap & Hash Routing
+    window.addEventListener('hashchange', () => {
+        const h = window.location.hash.replace('#', '');
+        if (h && ['overview', 'scenarios', 'workspace', 'findings', 'evidence', 'reports', 'diagnostics'].includes(h)) {
+            switchView(h, false);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryTab = urlParams.get('tab');
+        const initialHash = window.location.hash.replace('#', '');
+        const targetView = queryTab || initialHash || 'overview';
+
+        if (targetView && ['overview', 'scenarios', 'workspace', 'findings', 'evidence', 'reports', 'diagnostics'].includes(targetView)) {
+            switchView(targetView, false);
+        } else {
+            loadOverviewData();
+        }
+    });
+</script>
+
+</body>
+</html>

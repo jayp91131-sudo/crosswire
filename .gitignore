@@ -1,0 +1,69 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Caches and runtime artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+*.log
+
+# Environments and dependencies
+.venv/
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+*.cert
+*.pfx
+*.p12
+
+# Operating System & IDE metadata
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary verification and test runs
+test_*.db
+*.db-journal
+*.sqlite-journal
+clean_sync_verify/
+final_clean_verify/
+clean_extract_verify/
+remote_inspect/
+scratch/
+
+# Release archives and checksums (distributed as GitHub Release assets)
+*.zip
+*.sha256

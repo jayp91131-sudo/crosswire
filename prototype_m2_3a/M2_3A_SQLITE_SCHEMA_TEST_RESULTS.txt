@@ -1,0 +1,101 @@
+================================================================================
+CROSSWIRE 2.3A — EXECUTABLE SQLITE SCHEMA PROTOTYPE TEST EXECUTION RESULTS
+================================================================================
+Timestamp: 2026-11-13T12:33:27+05:30
+Python Environment: Python 3.11.15 (C:\Users\jayp9\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe)
+SQLite Version: 3.53.1
+Test Framework: pytest 9.2.0 / Standalone Adversarial Test Runner
+Database Mode: In-Memory / Isolated Disposable SQLite File (`prototype_m2_3a/disposable_prototype.db`)
+PRAGMA foreign_keys: ON
+PRAGMA recursive_triggers: ON
+
+================================================================================
+COMMAND 1: STANDALONE TEST RUNNER (EXACT RAW STDOUT)
+================================================================================
+Command:
+& "C:\Users\jayp9\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe" "C:\Users\jayp9\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py"
+
+Output:
+Executing 30 adversarial database tests...
+  [PASS] test_01_invalid_child_parent_relationship_rejected
+  [PASS] test_02_unauthorized_supplier_account_rejected
+  [PASS] test_03_disabled_supplier_authorization_rejected_at_dispatch
+  [PASS] test_04_unauthorized_payment_account_rejected
+  [PASS] test_05_disabled_payment_authorization_rejected_at_dispatch
+  [PASS] test_06_update_to_immutable_observation_blocked
+  [PASS] test_07_delete_from_immutable_observation_blocked
+  [PASS] test_08_insert_or_replace_cannot_bypass_immutability
+  [PASS] test_09_rejected_validation_cannot_become_authoritative
+  [PASS] test_10_inconclusive_validation_cannot_become_authoritative
+  [PASS] test_11_validated_observation_can_become_authoritative
+  [PASS] test_12_mismatched_operation_type_rejected
+  [PASS] test_13_mismatched_operation_attempt_relationship_rejected
+  [PASS] test_14_webhook_observation_stored_without_worker_fence
+  [PASS] test_15_manual_reconciliation_observation_stored_without_worker_fence
+  [PASS] test_16_cross_child_resolution_pointer_rejected
+  [PASS] test_17_expired_worker_lease_rejected
+  [PASS] test_18_stale_fencing_token_rejected
+  [PASS] test_19_duplicate_child_pricing_allocation_rejected
+  [PASS] test_20_invalid_pricing_allocation_relationship_rejected
+  [PASS] test_21_duplicate_active_reservation_across_children_rejected
+  [PASS] test_22_multiple_observations_for_same_child_and_reservation_accepted
+  [PASS] test_23_update_to_validations_table_blocked
+  [PASS] test_24_delete_from_validations_table_blocked
+  [PASS] test_25_update_to_resolution_history_blocked
+  [PASS] test_26_delete_from_resolution_history_blocked
+  [PASS] test_27_payment_outbox_cross_agency_intent_rejected
+  [PASS] test_28_null_idempotency_key_enforced_for_neither_and_lookup_only
+  [PASS] test_29_mandatory_idempotency_key_enforced_for_idempotent_with_lookup
+  [PASS] test_30_global_supplier_account_accessible_without_agency_grant
+
+Test Summary: 30 passed, 0 failed out of 30 total tests.
+
+================================================================================
+COMMAND 2: PYTEST VERBOSE EXECUTION (EXACT RAW STDOUT)
+================================================================================
+Command:
+$env:PYTHONPATH = "C:\Users\jayp9\.gemini\antigravity\scratch\crosswire\.venv\Lib\site-packages;C:\Users\jayp9\.gemini\antigravity\scratch\crosswire\prototype_m2_3a"
+& "C:\Users\jayp9\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe" -m pytest "C:\Users\jayp9\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py" -v
+
+Output:
+============================= test session starts =============================
+platform win32 -- Python 3.11.15, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\jayp9\AppData\Roaming\uv\python\cpython-3.11.15-windows-x86_64-none\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\jayp9\.gemini\antigravity\scratch\crosswire
+configfile: pytest.ini
+plugins: anyio-4.16.0, asyncio-1.4.1.post1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 30 items
+
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_01_invalid_child_parent_relationship_rejected PASSED [  3%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_02_unauthorized_supplier_account_rejected PASSED [  6%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_03_disabled_supplier_authorization_rejected_at_dispatch PASSED [ 10%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_04_unauthorized_payment_account_rejected PASSED [ 13%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_05_disabled_payment_authorization_rejected_at_dispatch PASSED [ 16%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_06_update_to_immutable_observation_blocked PASSED [ 20%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_07_delete_from_immutable_observation_blocked PASSED [ 23%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_08_insert_or_replace_cannot_bypass_immutability PASSED [ 26%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_09_rejected_validation_cannot_become_authoritative PASSED [ 30%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_10_inconclusive_validation_cannot_become_authoritative PASSED [ 33%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_11_validated_observation_can_become_authoritative PASSED [ 36%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_12_mismatched_operation_type_rejected PASSED [ 40%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_13_mismatched_operation_attempt_relationship_rejected PASSED [ 43%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_14_webhook_observation_stored_without_worker_fence PASSED [ 46%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_15_manual_reconciliation_observation_stored_without_worker_fence PASSED [ 50%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_16_cross_child_resolution_pointer_rejected PASSED [ 53%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_17_expired_worker_lease_rejected PASSED [ 56%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_18_stale_fencing_token_rejected PASSED [ 60%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_19_duplicate_child_pricing_allocation_rejected PASSED [ 63%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_20_invalid_pricing_allocation_relationship_rejected PASSED [ 66%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_21_duplicate_active_reservation_across_children_rejected PASSED [ 70%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_22_multiple_observations_for_same_child_and_reservation_accepted PASSED [ 73%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_23_update_to_validations_table_blocked PASSED [ 76%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_24_delete_from_validations_table_blocked PASSED [ 80%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_25_update_to_resolution_history_blocked PASSED [ 83%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_26_delete_from_resolution_history_blocked PASSED [ 86%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_27_payment_outbox_cross_agency_intent_rejected PASSED [ 90%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_28_null_idempotency_key_enforced_for_neither_and_lookup_only PASSED [ 93%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_29_mandatory_idempotency_key_enforced_for_idempotent_with_lookup PASSED [ 96%]
+..\..\..\..\.gemini\antigravity\scratch\crosswire\prototype_m2_3a\test_adversarial_suite.py::test_30_global_supplier_account_accessible_without_agency_grant PASSED [100%]
+
+============================= 30 passed in 0.27s ==============================

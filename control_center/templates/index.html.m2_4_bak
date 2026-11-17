@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crosswire Control Center | Cybersecurity Testing Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0F19;
+            --bg-surface: #111827;
+            --bg-card: #182234;
+            --bg-card-hover: #1F2C44;
+            --border: #2D3748;
+            --border-highlight: #4A5568;
+            --text-main: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --cyan: #06B6D4;
+            --cyan-glow: rgba(6, 182, 212, 0.25);
+            --emerald: #10B981;
+            --emerald-glow: rgba(16, 185, 129, 0.2);
+            --amber: #F59E0B;
+            --amber-glow: rgba(245, 158, 11, 0.2);
+            --rose: #F43F5E;
+            --rose-glow: rgba(244, 63, 94, 0.2);
+            --purple: #8B5CF6;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navbar */
+        header.navbar {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--cyan), #3B82F6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #FFF;
+            box-shadow: 0 0 16px var(--cyan-glow);
+        }
+        .brand-text {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
+        .brand-pill {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        /* Nav Pills */
+        nav.nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: #0D131F;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .tab-btn.active {
+            background: var(--bg-card);
+            color: var(--cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        .badge-count {
+            background: var(--rose);
+            color: #FFF;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 10px;
+        }
+
+        /* Top Actions */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .status-badge-sandbox {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--emerald);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--emerald);
+        }
+
+        /* Main Container */
+        main.content-area {
+            flex: 1;
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px 24px 60px 24px;
+        }
+
+        /* Tab Views */
+        .tab-view { display: none; }
+        .tab-view.active { display: block; }
+
+        /* KPI Section */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .kpi-card:hover {
+            border-color: var(--border-highlight);
+            transform: translateY(-2px);
+        }
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .kpi-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kpi-icon {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        .kpi-number {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -1px;
+            margin-bottom: 6px;
+        }
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .text-cyan { color: var(--cyan); }
+        .text-rose { color: var(--rose); }
+        .text-amber { color: var(--amber); }
+        .text-emerald { color: var(--emerald); }
+
+        /* General Card Layout */
+        .panel-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 14px;
+        }
+        .panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Scenarios Grid */
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .scenario-box {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .scenario-box:hover {
+            border-color: rgba(6, 182, 212, 0.5);
+            background: var(--bg-card-hover);
+        }
+        .scenario-box.selected {
+            border-color: var(--cyan);
+            background: #152238;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+        }
+        .scenario-badge {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .scenario-box.selected .scenario-badge {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--cyan);
+        }
+        .scenario-box-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        .scenario-box-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        .scenario-box-meta {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Runner Controls */
+        .runner-controls {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .mode-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .mode-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        .mode-radio-group {
+            display: flex;
+            gap: 8px;
+            background: #090E17;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .mode-option-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+        .mode-option-btn.active.vulnerable {
+            background: rgba(244, 63, 94, 0.2);
+            color: var(--rose);
+            border: 1px solid var(--rose);
+            box-shadow: 0 0 12px var(--rose-glow);
+        }
+        .mode-option-btn.active.fixed {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--emerald);
+            border: 1px solid var(--emerald);
+            box-shadow: 0 0 12px var(--emerald-glow);
+        }
+
+        .btn-execute {
+            background: linear-gradient(135deg, var(--cyan), #2563EB);
+            color: #FFF;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px var(--cyan-glow);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-execute:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+        }
+        .btn-execute:active {
+            transform: translateY(1px);
+        }
+        .btn-execute:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Timeline View */
+        .timeline-container {
+            position: relative;
+            padding: 12px 0 12px 28px;
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            left: 12px;
+            width: 2px;
+            background: var(--border);
+        }
+        .timeline-step {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .timeline-step:last-child {
+            margin-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -28px;
+            top: 4px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--bg-surface);
+            border: 2px solid var(--text-muted);
+            box-shadow: 0 0 0 4px var(--bg-surface);
+        }
+        .timeline-dot.info { border-color: var(--cyan); background: var(--cyan); }
+        .timeline-dot.warning { border-color: var(--amber); background: var(--amber); }
+        .timeline-dot.critical { border-color: var(--rose); background: var(--rose); box-shadow: 0 0 10px var(--rose); }
+        .timeline-dot.success { border-color: var(--emerald); background: var(--emerald); box-shadow: 0 0 10px var(--emerald); }
+
+        .timeline-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .timeline-time {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .timeline-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Finding Cards */
+        .finding-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+        .finding-card:hover {
+            border-color: var(--border-highlight);
+        }
+        .finding-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .finding-id-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .finding-id {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+        .badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-critical { background: rgba(244, 63, 94, 0.15); color: var(--rose); border: 1px solid var(--rose); }
+        .badge-high { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid var(--amber); }
+        .badge-medium { background: rgba(6, 182, 212, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+        .badge-low { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); border: 1px solid var(--text-muted); }
+
+        .cwe-tag {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            background: #0D131F;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        .finding-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .meta-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            background: #0C121D;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .meta-strip code {
+            font-family: var(--font-mono);
+            color: var(--cyan);
+        }
+        .compare-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .compare-col {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .compare-col.expected {
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .compare-col.actual {
+            background: rgba(244, 63, 94, 0.06);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+        .compare-col-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .compare-col.expected .compare-col-tag { color: var(--emerald); }
+        .compare-col.actual .compare-col-tag { color: var(--rose); }
+
+        .finding-section {
+            margin-bottom: 14px;
+        }
+        .finding-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .finding-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .remediation-block {
+            background: #090E17;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: #A7F3D0;
+            white-space: pre-wrap;
+        }
+
+        .retest-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-top: 16px;
+        }
+        .retest-strip-pending {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px dashed var(--amber);
+        }
+        .retest-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .retest-icon-pass {
+            color: var(--emerald);
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .btn-retest {
+            background: #0E7490;
+            color: #FFF;
+            border: 1px solid var(--cyan);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-retest:hover {
+            background: var(--cyan);
+            box-shadow: 0 0 12px var(--cyan-glow);
+        }
+
+        /* Tables */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table.data-table th, table.data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        table.data-table th {
+            background: #0F172A;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        table.data-table code {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--cyan);
+        }
+        .status-dot-pass {
+            color: var(--emerald);
+            font-weight: 700;
+        }
+        .status-dot-vuln {
+            color: var(--rose);
+            font-weight: 700;
+        }
+
+        /* Buttons & Utility */
+        .btn-secondary {
+            background: #1E293B;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn-secondary:hover {
+            background: #334155;
+            border-color: var(--border-highlight);
+        }
+
+        /* Evidence Modal / Json Display */
+        .json-pre {
+            background: #080C14;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: #CBD5E1;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        /* Report Preview Frame */
+        .report-frame {
+            width: 100%;
+            height: 600px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #FFF;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .kpi-row, .scenarios-grid { grid-template-columns: 1fr; }
+            .compare-box { grid-template-columns: 1fr; }
+            header.navbar { flex-direction: column; height: auto; padding: 12px; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="brand">
+            <div class="brand-icon">&#9889;</div>
+            <div>
+                <span class="brand-text">CROSSWIRE</span>
+                <span class="brand-pill">CONTROL CENTER M2.4</span>
+            </div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">
+                <span>&#128202;</span> Dashboard
+            </button>
+            <button class="tab-btn" onclick="switchTab('runner')">
+                <span>&#9889;</span> Scenario Runner
+            </button>
+            <button class="tab-btn" onclick="switchTab('timeline')">
+                <span>&#128344;</span> Timeline
+            </button>
+            <button class="tab-btn" onclick="switchTab('findings')">
+                <span>&#128737;</span> Findings <span class="badge-count" id="nav-findings-count">2</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('reports')">
+                <span>&#128196;</span> Reports
+            </button>
+        </nav>
+
+        <div class="nav-actions">
+            <div class="status-badge-sandbox">
+                <span class="pulse-dot"></span>
+                <span>SANDBOX ACTIVE</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content-area">
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-view active">
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-title">Total Executions</span>
+                        <span class="kpi-icon">&#9889;</span>
+                    </div>
+                    <div class="kpi-number text-cyan" id="kpi-total-exec">6</div>
+                    <div class="kpi-sub">Adversarial & control tests</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-title">Confirmed Vulnerabilities</span>
+                        <span class="kpi-icon">&#128737;</span>
+                    </div>
+                    <div class="kpi-number text-rose" id="kpi-vulns">2</div>
+                    <div class="kpi-sub">Mathematical Invariant Verification</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-title">Critical / High Severity</span>
+                        <span class="kpi-icon">&#9888;</span>
+                    </div>
+                    <div class="kpi-number text-amber" id="kpi-crit-high">1 / 1</div>
+                    <div class="kpi-sub">Financial leak & double-commit</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-title">Successful Retests</span>
+                        <span class="kpi-icon">&#10004;</span>
+                    </div>
+                    <div class="kpi-number text-emerald" id="kpi-retests">2</div>
+                    <div class="kpi-sub">100% remediation pass rate</div>
+                </div>
+            </div>
+
+            <!-- Monitored Invariants & Target Health -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">&#128269; Transaction & Financial Invariant Engine</div>
+                        <div class="panel-desc">Deterministic mathematical audits evaluated against ground-truth state (Session records held in memory).</div>
+                    </div>
+                    <button class="btn-secondary" onclick="switchTab('runner')">Run New Test &#8594;</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Invariant Key</th>
+                            <th>Target Invariant</th>
+                            <th>Vulnerability Scope</th>
+                            <th>Verification Status</th>
+                            <th>Active Mitigations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>INV-5.2</code></td>
+                            <td><strong>Booking Intent Uniqueness</strong></td>
+                            <td>Duplicate reservations under supplier commit-then-timeout (CWE-675)</td>
+                            <td><span class="status-dot-pass">&#10004; VERIFIED FIXED</span></td>
+                            <td>Idempotent key contract & reference lookup query</td>
+                        </tr>
+                        <tr>
+                            <td><code>INV-5.3</code></td>
+                            <td><strong>Webhook Idempotency</strong></td>
+                            <td>Duplicate ledger entries under replay (CWE-799)</td>
+                            <td><span class="status-dot-pass">&#10004; VERIFIED FIXED</span></td>
+                            <td>Atomic event deduplication store & SQLite transaction lock</td>
+                        </tr>
+                        <tr>
+                            <td><code>INV-5.5</code></td>
+                            <td><strong>Refund Boundedness</strong></td>
+                            <td>Disbursements exceeding refundable entitlement</td>
+                            <td><span class="status-dot-pass">&#10004; VERIFIED FIXED</span></td>
+                            <td>Entitlement pre-authorization ceiling gate</td>
+                        </tr>
+                        <tr>
+                            <td><code>INV-M2.3B</code></td>
+                            <td><strong>Parent Stay Coverage & Fencing</strong></td>
+                            <td>Split-brain worker collision & partial room drops</td>
+                            <td><span class="status-dot-pass">&#10004; VERIFIED FIXED</span></td>
+                            <td>CoverageOracle stay graph & monotonic fencing tokens</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Recent Execution Activity -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">&#128344; Recent Execution Audit Trail</div>
+                        <div class="panel-desc">In-memory session activity log across synthetic travel aggregator and supplier mock beds.</div>
+                    </div>
+                    <button class="btn-secondary" onclick="loadDashboard()">Refresh Activity</button>
+                </div>
+
+                <table class="data-table" id="recent-exec-table">
+                    <thead>
+                        <tr>
+                            <th>Execution ID</th>
+                            <th>Scenario</th>
+                            <th>Mode</th>
+                            <th>Status</th>
+                            <th>Target Invariants</th>
+                            <th>Duration</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-exec-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: SCENARIO RUNNER -->
+        <div id="tab-runner" class="tab-view">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">&#9889; Adversarial Scenario Runner</div>
+                        <div class="panel-desc">Select an approved testing scenario and toggle between vulnerable fault injection and fixed idempotency contracts.</div>
+                    </div>
+                </div>
+
+                <!-- Scenario Selection Grid -->
+                <div class="scenarios-grid">
+                    <div class="scenario-box selected" id="scen-box-timeout" onclick="selectScenario('SCN-TIMEOUT-001')">
+                        <span class="scenario-badge">SCN-TIMEOUT-001</span>
+                        <div class="scenario-box-title">Ambiguous Commit-Then-Timeout</div>
+                        <div class="scenario-box-desc">
+                            Supplier persists hotel reservation but network response is delayed (> 0.15s client timeout). Tests whether aggregator blindly creates duplicate commitments.
+                        </div>
+                        <div class="scenario-box-meta">&#128737; Invariant: INV-5.2 Uniqueness</div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn-secondary" style="font-size: 11px; padding: 4px 10px; color: var(--rose); border-color: rgba(244,63,94,0.4);" onclick="event.stopPropagation(); quickRun('SCN-TIMEOUT-001', 'VULNERABLE')">&#9888; Run Vulnerable</button>
+                            <button class="btn-secondary" style="font-size: 11px; padding: 4px 10px; color: var(--emerald); border-color: rgba(16,185,129,0.4);" onclick="event.stopPropagation(); quickRun('SCN-TIMEOUT-001', 'FIXED')">&#10004; Run Fixed</button>
+                        </div>
+                    </div>
+
+                    <div class="scenario-box" id="scen-box-webhook" onclick="selectScenario('SCN-WEBHOOK-001')">
+                        <span class="scenario-badge">SCN-WEBHOOK-001</span>
+                        <div class="scenario-box-title">Duplicate Refund Webhook</div>
+                        <div class="scenario-box-desc">
+                            Payment provider delivers the same refund webhook 3 times. Tests whether aggregator creates duplicate ledger credits and breaches the refundable entitlement ceiling.
+                        </div>
+                        <div class="scenario-box-meta">&#128737; Invariants: INV-5.3 & INV-5.5</div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn-secondary" style="font-size: 11px; padding: 4px 10px; color: var(--rose); border-color: rgba(244,63,94,0.4);" onclick="event.stopPropagation(); quickRun('SCN-WEBHOOK-001', 'VULNERABLE')">&#9888; Run Vulnerable</button>
+                            <button class="btn-secondary" style="font-size: 11px; padding: 4px 10px; color: var(--emerald); border-color: rgba(16,185,129,0.4);" onclick="event.stopPropagation(); quickRun('SCN-WEBHOOK-001', 'FIXED')">&#10004; Run Fixed</button>
+                        </div>
+                    </div>
+
+                    <div class="scenario-box" id="scen-box-outbox" onclick="selectScenario('SCN-OUTBOX-001')">
+                        <span class="scenario-badge">SCN-OUTBOX-001</span>
+                        <div class="scenario-box-title">Multi-Supplier Coordinated Outbox</div>
+                        <div class="scenario-box-desc">
+                            Dispatches a 2-room split booking across Expedia and Hotelbeds with simulated commit-then-timeout. Tests capability-aware dispatching, CoverageOracle, and ParentCoordinator.
+                        </div>
+                        <div class="scenario-box-meta">&#128737; Stay Coverage & Fencing</div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn-secondary" style="font-size: 11px; padding: 4px 10px; color: var(--rose); border-color: rgba(244,63,94,0.4);" onclick="event.stopPropagation(); quickRun('SCN-OUTBOX-001', 'VULNERABLE')">&#9888; Run Vulnerable</button>
+                            <button class="btn-secondary" style="font-size: 11px; padding: 4px 10px; color: var(--emerald); border-color: rgba(16,185,129,0.4);" onclick="event.stopPropagation(); quickRun('SCN-OUTBOX-001', 'FIXED')">&#10004; Run Fixed</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls & Execute Button -->
+                <div class="runner-controls">
+                    <div class="mode-selector">
+                        <span class="mode-label">Execution Mode:</span>
+                        <div class="mode-radio-group">
+                            <button class="mode-option-btn active vulnerable" id="btn-mode-vuln" onclick="setMode('VULNERABLE')">
+                                &#9888; VULNERABLE MODE (Fault Injection)
+                            </button>
+                            <button class="mode-option-btn fixed" id="btn-mode-fixed" onclick="setMode('FIXED')">
+                                &#10004; FIXED MODE (Idempotency Contract)
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn-execute" id="btn-run-scenario" onclick="triggerRunScenario()">
+                        <span>&#9654;</span> EXECUTE SCENARIO
+                    </button>
+                </div>
+
+                <!-- Live Execution Console / Output -->
+                <div id="runner-live-output" style="display: none;">
+                    <div class="panel-header" style="margin-top: 24px;">
+                        <div class="panel-title" id="runner-output-title">&#9889; Live Execution Output</div>
+                        <div class="panel-desc" id="runner-output-meta">Running...</div>
+                    </div>
+
+                    <div id="runner-result-card" style="margin-bottom: 20px;"></div>
+
+                    <div class="timeline-container" id="runner-timeline-box">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: TIMELINE AUDIT -->
+        <div id="tab-timeline" class="tab-view">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">&#128344; Execution Event Timeline Audit</div>
+                        <div class="panel-desc">Granular chronological audit of booking intent creation, network dispatches, supplier persistence, and invariant checks.</div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="font-size: 13px; color: var(--text-muted);">Select Execution:</span>
+                        <select id="timeline-exec-select" onchange="renderSelectedTimeline()" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 12px;">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="timeline-container" id="timeline-detail-box">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: FINDINGS & EVIDENCE -->
+        <div id="tab-findings" class="tab-view">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">&#128737; Confirmed Security Findings</div>
+                        <div class="panel-desc">Mathematically proven transaction security vulnerabilities grounded in supplier ground truth.</div>
+                    </div>
+                </div>
+
+                <div id="findings-container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: REPORTS & EXPORT -->
+        <div id="tab-reports" class="tab-view">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">&#128196; Security Assessment Reports & Data Export</div>
+                        <div class="panel-desc">Export executive security reports, relational evidence manifests, and structured JSON logs for technical review.</div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/api/reports/html" target="_blank" class="btn-execute" style="text-decoration: none; padding: 8px 18px; font-size: 13px;">
+                            <span>&#128196;</span> Open Full HTML Report &#8599;
+                        </a>
+                        <a href="/api/reports/json/findings" download="crosswire_findings.json" class="btn-secondary">
+                            <span>&#128190;</span> Export Findings (JSON)
+                        </a>
+                        <a href="/api/reports/json/executions" download="crosswire_executions.json" class="btn-secondary">
+                            <span>&#128190;</span> Export Executions (JSON)
+                        </a>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Report Live Preview:</div>
+                    <iframe class="report-frame" src="/api/reports/html"></iframe>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let currentScenarioId = 'SCN-TIMEOUT-001';
+        let currentMode = 'VULNERABLE';
+        let globalState = null;
+
+        // Switch Navigation Tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
+
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.toLowerCase().includes(tabName));
+            if (targetBtn) targetBtn.classList.add('active');
+
+            const targetView = document.getElementById(`tab-${tabName}`);
+            if (targetView) targetView.classList.add('active');
+
+            if (tabName === 'dashboard') loadDashboard();
+            if (tabName === 'timeline') loadTimelineOptions();
+            if (tabName === 'findings') loadFindings();
+        }
+
+        // Scenario Selector
+        function selectScenario(scenId) {
+            currentScenarioId = scenId;
+            document.querySelectorAll('.scenario-box').forEach(b => b.classList.remove('selected'));
+            if (scenId === 'SCN-TIMEOUT-001') document.getElementById('scen-box-timeout').classList.add('selected');
+            if (scenId === 'SCN-WEBHOOK-001') document.getElementById('scen-box-webhook').classList.add('selected');
+            if (scenId === 'SCN-OUTBOX-001') document.getElementById('scen-box-outbox').classList.add('selected');
+        }
+
+        // Mode Selector
+        function setMode(mode) {
+            currentMode = mode;
+            const btnV = document.getElementById('btn-mode-vuln');
+            const btnF = document.getElementById('btn-mode-fixed');
+
+            if (mode === 'VULNERABLE') {
+                btnV.classList.add('active');
+                btnF.classList.remove('active');
+            } else {
+                btnF.classList.add('active');
+                btnV.classList.remove('active');
+            }
+        }
+
+        // Load Dashboard Data
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                globalState = data;
+
+                document.getElementById('kpi-total-exec').innerText = data.total_executions;
+                document.getElementById('kpi-vulns').innerText = data.confirmed_vulnerabilities;
+                document.getElementById('kpi-crit-high').innerText = `${data.severity_counts.CRITICAL} / ${data.severity_counts.HIGH}`;
+                document.getElementById('kpi-retests').innerText = `${data.successful_retests} / ${data.confirmed_vulnerabilities}`;
+                document.getElementById('nav-findings-count').innerText = data.confirmed_vulnerabilities;
+
+                // Render recent executions table
+                const tbody = document.getElementById('recent-exec-tbody');
+                tbody.innerHTML = '';
+                data.recent_activity.forEach(ex => {
+                    const row = document.createElement('tr');
+                    const isVuln = ex.status.includes('VULN');
+                    row.innerHTML = `
+                        <td><code>${ex.execution_id}</code></td>
+                        <td><strong>${ex.scenario_name}</strong></td>
+                        <td><span class="badge ${ex.mode === 'VULNERABLE' ? 'badge-critical' : 'badge-low'}">${ex.mode}</span></td>
+                        <td><span class="${isVuln ? 'status-dot-vuln' : 'status-dot-pass'}">${isVuln ? '&#9888; VULN' : '&#10004; PASS'}</span></td>
+                        <td><code>${ex.invariants_checked.join(', ')}</code></td>
+                        <td>${ex.duration_ms.toFixed(1)}ms</td>
+                        <td style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">${ex.timestamp.split('T')[1].slice(0, 8)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                console.error('Failed to load dashboard stats:', err);
+            }
+        }
+
+        // Load Findings
+        async function loadFindings() {
+            try {
+                const res = await fetch('/api/findings');
+                const findings = await res.json();
+                const container = document.getElementById('findings-container');
+                container.innerHTML = '';
+
+                findings.forEach(f => {
+                    const sevBadge = f.severity.toLowerCase();
+                    const hasRetest = f.retest_result && f.retest_result.fixed_mode_passed;
+
+                    let retestHtml = '';
+                    if (hasRetest) {
+                        retestHtml = `
+                            <div class="retest-strip">
+                                <div class="retest-info">
+                                    <span class="retest-icon-pass">&#10004;</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 13px; color: var(--emerald);">RETEST PROVED VULNERABILITY REMEDIATED</div>
+                                        <div style="font-size: 12px; color: var(--text-secondary);">${f.retest_result.summary}</div>
+                                    </div>
+                                </div>
+                                <button class="btn-retest" onclick="runRetest('${f.finding_id}', '${f.scenario_id}')">&#8634; Re-Run Retest</button>
+                            </div>
+                        `;
+                    } else {
+                        retestHtml = `
+                            <div class="retest-strip retest-strip-pending">
+                                <div class="retest-info">
+                                    <span style="color: var(--amber); font-size: 18px;">&#9888;</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 13px; color: var(--amber);">Retest Required</div>
+                                        <div style="font-size: 12px; color: var(--text-secondary);">Run the fixed scenario to prove invariant remediation.</div>
+                                    </div>
+                                </div>
+                                <button class="btn-retest" onclick="runRetest('${f.finding_id}', '${f.scenario_id}')">&#9654; RUN RETEST (FIXED MODE)</button>
+                            </div>
+                        `;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'finding-card';
+                    card.innerHTML = `
+                        <div class="finding-top">
+                            <div class="finding-id-group">
+                                <span class="finding-id">${f.finding_id}</span>
+                                <span class="badge badge-${sevBadge}">${f.severity}</span>
+                                <span class="cwe-tag">${f.cwe.split(':')[0]}</span>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">${f.scenario_id}</span>
+                        </div>
+
+                        <div class="finding-title">${f.title}</div>
+
+                        <div class="meta-strip">
+                            <div><strong>Violated Invariant:</strong> <code>${f.violated_invariant}</code></div>
+                            <div><strong>Logical Intent:</strong> <code>${f.logical_intent_id}</code></div>
+                            <div><strong>Supplier Res IDs:</strong> <code>${f.supplier_reservation_ids.length ? f.supplier_reservation_ids.join(', ') : 'None'}</code></div>
+                        </div>
+
+                        <div class="compare-box">
+                            <div class="compare-col expected">
+                                <span class="compare-col-tag">Expected</span>
+                                <div>${f.expected_outcome}</div>
+                            </div>
+                            <div class="compare-col actual">
+                                <span class="compare-col-tag">Actual (Vulnerable)</span>
+                                <div>${f.actual_outcome}</div>
+                            </div>
+                        </div>
+
+                        <div class="finding-section">
+                            <div class="finding-section-title">Technical Root Cause</div>
+                            <div class="finding-text">${f.technical_description}</div>
+                        </div>
+
+                        <div class="finding-section">
+                            <div class="finding-section-title">Remediation Guidance</div>
+                            <pre class="remediation-block">${f.remediation_guidance}</pre>
+                        </div>
+
+                        ${retestHtml}
+
+                        <details style="margin-top: 14px;">
+                            <summary style="font-size: 12px; color: var(--cyan); cursor: pointer; user-select: none;">Expand Ground-Truth Evidence (JSON)</summary>
+                            <pre class="json-pre" style="margin-top: 8px;"><code>${JSON.stringify(f.evidence, null, 2)}</code></pre>
+                        </details>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                console.error('Failed to load findings:', err);
+            }
+        }
+
+        // Run Retest from Finding Card
+        async function runRetest(findingId, scenarioId) {
+            selectScenario(scenarioId);
+            setMode('FIXED');
+            switchTab('runner');
+            await triggerRunScenario(findingId);
+        }
+
+        // Quick Run directly from Scenario Cards
+        async function quickRun(scenarioId, mode) {
+            selectScenario(scenarioId);
+            setMode(mode);
+            switchTab('runner');
+            await triggerRunScenario();
+        }
+
+        // Trigger Scenario Execution
+        async function triggerRunScenario(targetFindingId = null) {
+            const btn = document.getElementById('btn-run-scenario');
+            btn.disabled = true;
+            btn.innerHTML = '<span>&#8987;</span> EXECUTING...';
+
+            const outputContainer = document.getElementById('runner-live-output');
+            const timelineBox = document.getElementById('runner-timeline-box');
+            const resultCard = document.getElementById('runner-result-card');
+            outputContainer.style.display = 'block';
+            timelineBox.innerHTML = '<div style="padding: 16px; color: var(--cyan); font-family: var(--font-mono);">Connecting to Crosswire engine...</div>';
+            resultCard.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/scenarios/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        scenario_id: currentScenarioId,
+                        mode: currentMode,
+                        target_finding_id: targetFindingId
+                    })
+                });
+
+                const exec = await res.json();
+                renderTimelineToElement(exec.events, timelineBox);
+                document.getElementById('runner-output-title').innerText = `Execution Complete: [${exec.execution_id}]`;
+                document.getElementById('runner-output-meta').innerText = `${exec.status} in ${exec.duration_ms.toFixed(1)}ms`;
+
+                // Render High-Impact Result Card
+                const isVuln = exec.status.includes('VULN');
+                if (isVuln) {
+                    resultCard.innerHTML = `
+                        <div style="background: rgba(244, 63, 94, 0.12); border: 2px solid var(--rose); border-radius: 8px; padding: 20px; box-shadow: 0 0 24px var(--rose-glow);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="font-size: 16px; font-weight: 800; color: var(--rose); display: flex; align-items: center; gap: 8px;">
+                                    <span>&#9888;</span> VULNERABILITY CONFIRMED: Invariant Violated!
+                                </div>
+                                <div>
+                                    <span class="badge badge-critical">${exec.finding_id || 'CW-SEC'}</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; margin-bottom: 14px; color: var(--text-main);">
+                                Target Invariant <code>${exec.invariants_checked.join(', ')}</code> was mathematically violated under simulated fault injection.
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <button class="btn-execute" style="background: var(--emerald); padding: 8px 18px; font-size: 13px;" onclick="runRetest('${exec.finding_id}', '${exec.scenario_id}')">
+                                    <span>&#10004;</span> RUN FIXED RETEST NOW ➔
+                                </button>
+                                <button class="btn-secondary" onclick="switchTab('findings')">
+                                    Inspect Full Evidence
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultCard.innerHTML = `
+                        <div style="background: rgba(16, 185, 129, 0.12); border: 2px solid var(--emerald); border-radius: 8px; padding: 20px; box-shadow: 0 0 24px var(--emerald-glow);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="font-size: 16px; font-weight: 800; color: var(--emerald); display: flex; align-items: center; gap: 8px;">
+                                    <span>&#10004;</span> INVARIANT SATISFIED: Transaction Reconciled Safely!
+                                </div>
+                                <div>
+                                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--emerald); border: 1px solid var(--emerald);">REMEDIATION VERIFIED</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; margin-bottom: 14px; color: var(--text-main);">
+                                All monitored invariants (<code>${exec.invariants_checked.join(', ')}</code>) passed against SQLite ground truth.
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <a href="/api/reports/html" target="_blank" class="btn-execute" style="text-decoration: none; padding: 8px 18px; font-size: 13px;">
+                                    <span>&#128196;</span> Export HTML Security Report &#8599;
+                                </a>
+                                <button class="btn-secondary" onclick="switchTab('dashboard')">
+                                    Return to Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Refresh dashboard stats
+                loadDashboard();
+            } catch (err) {
+                timelineBox.innerHTML = `<div style="color: var(--rose);">Execution Error: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>&#9654;</span> EXECUTE SCENARIO';
+            }
+        }
+
+        // Load Timeline Options
+        async function loadTimelineOptions() {
+            try {
+                const res = await fetch('/api/executions');
+                const executions = await res.json();
+                const select = document.getElementById('timeline-exec-select');
+                select.innerHTML = '';
+
+                executions.forEach(ex => {
+                    const opt = document.createElement('option');
+                    opt.value = ex.execution_id;
+                    opt.innerText = `[${ex.mode}] ${ex.scenario_name} (${ex.execution_id})`;
+                    select.appendChild(opt);
+                });
+
+                renderSelectedTimeline();
+            } catch (err) {
+                console.error('Failed to load executions for timeline:', err);
+            }
+        }
+
+        // Render Selected Timeline
+        async function renderSelectedTimeline() {
+            const select = document.getElementById('timeline-exec-select');
+            const execId = select.value;
+            if (!execId) return;
+
+            const box = document.getElementById('timeline-detail-box');
+            box.innerHTML = '<div style="color: var(--text-muted);">Loading events...</div>';
+
+            try {
+                const res = await fetch(`/api/executions/${execId}`);
+                const exec = await res.json();
+                renderTimelineToElement(exec.events, box);
+            } catch (err) {
+                box.innerHTML = `<div style="color: var(--rose);">Error loading timeline: ${err.message}</div>`;
+            }
+        }
+
+        // Helper to Render Timeline Events
+        function renderTimelineToElement(events, element) {
+            element.innerHTML = '';
+            if (!events || !events.length) {
+                element.innerHTML = '<div style="color: var(--text-muted);">No timeline events recorded.</div>';
+                return;
+            }
+
+            events.forEach(ev => {
+                const step = document.createElement('div');
+                step.className = 'timeline-step';
+                step.innerHTML = `
+                    <div class="timeline-dot ${ev.status.toLowerCase()}"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <span class="timeline-title">${ev.title}</span>
+                            <span class="timeline-time">${ev.timestamp.split('T')[1].slice(0, 12)}</span>
+                        </div>
+                        <div class="timeline-detail">${ev.detail}</div>
+                    </div>
+                `;
+                element.appendChild(step);
+            });
+        }
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>

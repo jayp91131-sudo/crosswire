@@ -1,0 +1,51 @@
+scenario:
+  name: "Ambiguous Supplier Timeout & Duplicate Reservation"
+  cwe: "CWE-675: Multiple Operations on Resource / CWE-841: Improper Enforcement of Behavioral Workflow"
+  description: >
+    Simulates a hotel supplier committing a room reservation to its SQLite database,
+    then experiencing an in-flight network drop/delay before the response reaches the aggregator.
+    Evaluates whether the aggregator blindly retries (vulnerable) or recovers idempotently (fixed).
+
+actors:
+  agency:
+    id: "agency_alpha"
+    name: "Agency Alpha B2B Travels"
+  aggregator:
+    app: "target_platform.aggregator.app:aggregator_app"
+    http_timeout_seconds: 0.20
+  supplier:
+    app: "target_platform.supplier.app:supplier_app"
+    timeout_delay_seconds: 0.35
+
+parameters:
+  intent_id: "INTENT-001"
+  hotel_id: "htl_mumbai_grand"
+  hotel_name: "Synthetic Hotel Mumbai"
+  room_type: "deluxe_suite"
+  amount: 15000.0
+  currency: "INR"
+  guest_name: "Aarav Sharma"
+
+invariants:
+  - id: "INV-5.2"
+    name: "Booking Intent Uniqueness"
+    rule: "COUNT(DISTINCT confirmed supplier reservations linked to intent) <= 1"
+    failure_severity: "HIGH"
+
+modes:
+  vulnerable:
+    aggregator_mode: "VULNERABLE"
+    supplier_mode: "VULNERABLE"
+    expected_supplier_reservations: 2
+    expected_invariant_outcome: "FAIL"
+  fixed:
+    aggregator_mode: "FIXED"
+    supplier_mode: "IDEMPOTENT"
+    expected_supplier_reservations: 1
+    expected_invariant_outcome: "PASS"
+  unsupported_fallback:
+    aggregator_mode: "FIXED"
+    supplier_mode: "UNSUPPORTED"
+    expected_status: "SUPPLIER_UNKNOWN"
+    expected_supplier_reservations: 1
+    expected_invariant_outcome: "PASS"

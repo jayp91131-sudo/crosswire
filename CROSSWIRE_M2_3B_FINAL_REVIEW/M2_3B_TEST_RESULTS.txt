@@ -1,0 +1,92 @@
+===============================================================================
+CROSSWIRE M2.3B & M2.2 BASELINE TEST EXECUTION RESULTS (FRESH RUN)
+===============================================================================
+Timestamp: 2026-11-14T15:05:01+05:30
+Python Version: Python 3.11.15
+Platform: Windows (win32)
+Root Directory: C:\Users\jayp9\.gemini\antigravity\scratch\crosswire
+
+===============================================================================
+PART 1: M2.3B MULTI-SUPPLIER OUTBOX & EXECUTION TEST SUITE (45 TESTS)
+===============================================================================
+Command: python -m pytest m2_3b/tests/ -v
+Execution Start: 2026-11-14T15:03:32+05:30
+Execution Finish: 2026-11-14T15:03:35+05:30
+
+============================= test session starts =============================
+platform win32 -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+cachedir: .pytest_cache
+rootdir: C:\Users\jayp9\.gemini\antigravity\scratch\crosswire
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.4.1.post1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 45 items
+
+m2_3b/tests/test_coverage_oracle.py::test_01_full_coverage_and_occupancy_satisfied PASSED [  2%]
+m2_3b/tests/test_coverage_oracle.py::test_02_gap_in_dates_fails_coverage PASSED [  4%]
+m2_3b/tests/test_coverage_oracle.py::test_03_property_mismatch_fails_coverage PASSED [  6%]
+m2_3b/tests/test_coverage_oracle.py::test_04_occupancy_deficit_fails_coverage PASSED [  8%]
+m2_3b/tests/test_coverage_oracle.py::test_05_split_stay_continuity_across_suppliers PASSED [ 11%]
+m2_3b/tests/test_coverage_oracle.py::test_06_intra_slot_overlap_rejection PASSED [ 13%]
+m2_3b/tests/test_coverage_oracle.py::test_07_per_room_occupancy_deficit_rejection PASSED [ 15%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_01_worker_crash_after_dispatch_before_commit PASSED [ 17%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_02_worker_crash_during_lease_renewal PASSED [ 20%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_03_lease_expiry_during_long_running_supplier_call PASSED [ 22%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_04_two_workers_racing_on_expired_lease PASSED [ 24%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_05_late_response_rejected_by_fencing_token_trigger PASSED [ 26%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_06_duplicate_supplier_webhook_preserves_evidence_idempotently PASSED [ 28%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_07_outbox_retry_exhaustion_escalates_to_reconciliation PASSED [ 31%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_08_cancellation_dispatched_while_creation_in_flight PASSED [ 33%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_09_concurrent_parent_saga_evaluations PASSED [ 35%]
+m2_3b/tests/test_crash_recovery_concurrency.py::test_10_database_restart_mid_transaction_rollback PASSED [ 37%]
+m2_3b/tests/test_outbox_engine.py::test_01_operation_creation_stable_ids_and_payload_hash PASSED [ 40%]
+m2_3b/tests/test_outbox_engine.py::test_02_capability_idempotency_key_enforcement PASSED [ 42%]
+m2_3b/tests/test_outbox_engine.py::test_03_atomic_lease_acquisition PASSED [ 44%]
+m2_3b/tests/test_outbox_engine.py::test_04_lease_expiry_and_peer_worker_recovery PASSED [ 46%]
+m2_3b/tests/test_outbox_engine.py::test_05_fencing_token_rejects_stale_worker PASSED [ 48%]
+m2_3b/tests/test_outbox_engine.py::test_06_account_revocation_blocks_lease_dispatch PASSED [ 51%]
+m2_3b/tests/test_outbox_engine.py::test_07_concurrent_worker_leasing_no_conflicts PASSED [ 53%]
+m2_3b/tests/test_parent_coordinator.py::test_01_all_children_confirmed_and_coverage_satisfied PASSED [ 55%]
+m2_3b/tests/test_parent_coordinator.py::test_02_partial_failure_initiates_all_or_nothing_compensation PASSED [ 57%]
+m2_3b/tests/test_parent_coordinator.py::test_03_compensation_completion_cancels_parent_and_releases_hold PASSED [ 60%]
+m2_3b/tests/test_parent_coordinator.py::test_04_ambiguous_child_forces_reconciliation_required_and_retains_hold PASSED [ 62%]
+m2_3b/tests/test_parent_coordinator.py::test_05_late_confirmation_after_cancellation_preserves_cancelled_state PASSED [ 64%]
+m2_3b/tests/test_pinned_transport.py::test_01_cgnat_rfc6598_ip_is_blocked PASSED [ 66%]
+m2_3b/tests/test_pinned_transport.py::test_02_cloud_metadata_and_loopback_blocked PASSED [ 68%]
+m2_3b/tests/test_pinned_transport.py::test_03_ipv4_mapped_ipv6_blocked PASSED [ 71%]
+m2_3b/tests/test_pinned_transport.py::test_04_userinfo_in_url_rejected PASSED [ 73%]
+m2_3b/tests/test_pinned_transport.py::test_05_unapproved_port_rejected PASSED [ 75%]
+m2_3b/tests/test_pinned_transport.py::test_06_insecure_http_rejected PASSED [ 77%]
+m2_3b/tests/test_pinned_transport.py::test_07_unauthorized_supplier_host_rejected PASSED [ 80%]
+m2_3b/tests/test_pinned_transport.py::test_08_dns_rebinding_mixed_answers_blocked PASSED [ 82%]
+m2_3b/tests/test_pinned_transport.py::test_09_redirect_cross_origin_credential_stripping PASSED [ 84%]
+m2_3b/tests/test_pinned_transport.py::test_10_real_socket_ip_pinning_over_local_tls PASSED [ 86%]
+m2_3b/tests/test_supplier_capabilities.py::test_01_idempotent_with_lookup_clean_success PASSED [ 88%]
+m2_3b/tests/test_supplier_capabilities.py::test_02_idempotent_with_lookup_safe_replay_prevents_duplicate PASSED [ 91%]
+m2_3b/tests/test_supplier_capabilities.py::test_03_lookup_only_never_blind_retries PASSED [ 93%]
+m2_3b/tests/test_supplier_capabilities.py::test_04_lookup_only_unresolved_escalates_to_reconciliation PASSED [ 95%]
+m2_3b/tests/test_supplier_capabilities.py::test_05_neither_capability_immediate_reconciliation PASSED [ 97%]
+m2_3b/tests/test_supplier_capabilities.py::test_06_independent_create_and_cancel_capabilities PASSED [100%]
+
+============================= 45 passed in 1.52s ==============================
+
+===============================================================================
+PART 2: M2.2 FROZEN BASELINE TEST SUITE (196 TESTS)
+===============================================================================
+Command: python -m pytest tests -q
+Execution Start: 2026-11-14T15:03:53+05:30
+Execution Finish: 2026-11-14T15:05:01+05:30
+
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+....................................................                     [100%]
+196 passed in 67.46s (0:01:07)
+
+===============================================================================
+TOTAL VERIFIED TEST SUITE SUMMARY
+===============================================================================
+- M2.3B Outbox Engine Tests:  45 passed, 0 failed, 0 skipped (100% pass rate)
+- M2.2 Frozen Baseline Tests: 196 passed, 0 failed, 0 skipped (100% pass rate)
+- Total System Tests:         241 passed, 0 failed, 0 skipped (100% pass rate)
+- Regression Count:           0
+===============================================================================
